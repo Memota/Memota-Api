@@ -3,9 +3,11 @@ import helmet from "koa-helmet"
 import { createConnection } from "typeorm"
 import koaBody from "koa-body"
 import * as PostgressConnectionStringParser from "pg-connection-string"
+import winston from "winston"
 
 import { config } from "./config"
 import { router } from "./routes"
+import { logger } from "./logger"
 
 const connectionOptions = PostgressConnectionStringParser.parse(config.databaseUrl)
 
@@ -36,6 +38,9 @@ createConnection({
       ctx.set("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE, OPTIONS")
       await next()
     })
+
+    // Logger middleware
+    app.use(logger(winston))
 
     // Parse request body
     app.use(koaBody())

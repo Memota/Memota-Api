@@ -6,6 +6,7 @@ export interface Config {
   port: number
   databaseUrl: string
   dbEntitiesPath: string[]
+  debugLogging: boolean
   baseUrl: string
   smtpHost: string
   smtpPort: number
@@ -21,6 +22,7 @@ const config: Config = {
   port: +(process.env.PORT || 3000),
   databaseUrl: process.env.DATABASE_URL,
   dbEntitiesPath: [...(isDevMode ? ["src/entity/**/*.ts"] : ["dist/entity/**/*.js"])],
+  debugLogging: isDevMode,
   baseUrl: process.env.BASE_URL,
   smtpHost: process.env.SMTP_HOST,
   smtpPort: Number(process.env.SMTP_PORT),

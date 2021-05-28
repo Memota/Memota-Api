@@ -21,5 +21,5 @@ export const email = new Email({
   },
   transport: transporter,
   send: true,
-  preview: false,
+  preview: config.debugLogging,
 })
