@@ -1,7 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn} from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { Length, IsEmail, IsOptional, ValidateIf } from "class-validator"
 import { IsUniq } from "@join-com/typeorm-class-validator-is-uniq"
 import { hash } from "bcrypt"
+
+import { EmailVerifyToken } from "./emailVerifyToken"
 
 @Entity()
 export class User {
@@ -28,6 +30,12 @@ export class User {
   @Column({ default: false })
   @IsOptional()
   verified: boolean
+
+  @OneToOne(
+    type => EmailVerifyToken,
+    EmailVerifyToken => EmailVerifyToken.user,
+  )
+  verify_token: EmailVerifyToken
 
   @Column({ length: 20, default: "user" })
   @Length(2, 20)

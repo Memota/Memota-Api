@@ -27,7 +27,7 @@ createConnection({
     const app = new Koa()
 
     // Adds various security headers
-    //app.use(helmet())
+    app.use(helmet())
 
     // Adds CORS header
     app.use(async (ctx, next) => {
