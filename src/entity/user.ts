@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn } from "typeorm"
-import { Length, IsEmail, IsOptional, ValidateIf } from "class-validator"
+import { Length, IsEmail, IsOptional, ValidateIf, Matches } from "class-validator"
 import { IsUniq } from "@join-com/typeorm-class-validator-is-uniq"
 import { hash } from "bcrypt"
 
@@ -10,18 +10,19 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @Column({ length: 80, unique: true })
-  @Length(3, 80, { groups: ["register", "login", "send-reset"] })
+  @Matches(new RegExp("^[\\w_]+$", "g"), { groups: ["register"] })
+  @Column({ length: 32, unique: true })
+  @Length(3, 32, { groups: ["register", "login", "send-reset"] })
   @IsUniq({ groups: ["register"] })
   @ValidateIf(o => o.email == undefined, { groups: ["login", "send-reset"] })
   username: string
 
-  @Column({ length: 100 })
-  @Length(5, 60, { groups: ["register", "login"] })
+  @Column({ length: 64 })
+  @Length(5, 64, { groups: ["register", "login"] })
   password: string
 
-  @Column({ length: 100, unique: true })
-  @Length(10, 100, { groups: ["register", "login", "resend", "send-reset"] })
+  @Column({ length: 64, unique: true })
+  @Length(5, 64, { groups: ["register", "login", "resend", "send-reset"] })
   @IsEmail(undefined, { groups: ["register", "login", "resend", "send-reset"] })
   @IsUniq({ groups: ["register"] })
   @IsOptional({ groups: ["login", "send-reset"] })
