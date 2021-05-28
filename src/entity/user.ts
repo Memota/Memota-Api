@@ -10,7 +10,7 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @Matches(new RegExp("^[\\w_]+$", "g"), { groups: ["register"] })
+  @Matches(new RegExp("^[a-zA-Z0-9_]+$"), { groups: ["register"] })
   @Column({ length: 32, unique: true })
   @Length(3, 32, { groups: ["register", "login", "send-reset"] })
   @IsUniq({ groups: ["register"] })
