@@ -32,6 +32,9 @@
     "express": "^4.17.1",
     "koa": "^2.13.1",
     "koa-helmet": "^6.1.0",
-    "koa-swagger-decorator": "^1.7.4"
+    "koa-swagger-decorator": "^1.7.4",
+    "pg": "^8.6.0",
+    "pg-connection-string": "^2.5.0",
+    "typeorm": "^0.2.32"
   }
 }

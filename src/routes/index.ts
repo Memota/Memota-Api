@@ -3,8 +3,6 @@ import { user } from "./user"
 
 const router = new SwaggerRouter()
 
-
-
 // Include all routes
 router.use("/user", user.routes()).use(user.allowedMethods())
 
