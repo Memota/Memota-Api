@@ -27,7 +27,9 @@
     "typescript": "^3.7.4"
   },
   "dependencies": {
+    "@join-com/typeorm-class-validator-is-uniq": "^2.0.0",
     "@koa/cors": "^3.1.0",
+    "class-validator": "^0.13.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "koa": "^2.13.1",
