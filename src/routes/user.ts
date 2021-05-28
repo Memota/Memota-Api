@@ -1,8 +1,8 @@
-import { SwaggerRouter } from "koa-swagger-decorator"
+import Router from "@koa/router"
 
 import { user } from "../controller"
 
-const router = new SwaggerRouter()
+const router = new Router()
 
 router.post("/register", user.createUser)
 
