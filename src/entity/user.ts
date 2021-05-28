@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn} from "typeorm"
 import { Length, IsEmail, IsOptional, ValidateIf } from "class-validator"
 import { IsUniq } from "@join-com/typeorm-class-validator-is-uniq"
+import { hash } from "bcrypt"
 
 @Entity()
 export class User {
@@ -32,6 +33,10 @@ export class User {
   @Length(2, 20)
   @IsOptional()
   role: string
+
+  async hashPassword() {
+    this.password = await hash(this.password, 10)
+  }
 }
 
 export const userSchema = {

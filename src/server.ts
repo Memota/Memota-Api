@@ -1,6 +1,7 @@
 import Koa from "koa"
 import helmet from "koa-helmet"
 import { createConnection } from "typeorm"
+import koaBody from "koa-body"
 import * as PostgressConnectionStringParser from "pg-connection-string"
 
 import { config } from "./config"
@@ -26,7 +27,7 @@ createConnection({
     const app = new Koa()
 
     // Adds various security headers
-    app.use(helmet())
+    //app.use(helmet())
 
     // Adds CORS header
     app.use(async (ctx, next) => {
@@ -35,6 +36,9 @@ createConnection({
       ctx.set("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE, OPTIONS")
       await next()
     })
+
+    // Parse request body
+    app.use(koaBody())
 
     // Register routes
     app.use(router.routes()).use(router.allowedMethods())
