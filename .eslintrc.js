@@ -34,6 +34,12 @@ module.exports = {
         requireLast: false,
       },
     }],
+    '@typescript-eslint/unbound-method': [
+      'error',
+      {
+        'ignoreStatic': true,
+      },
+    ],
   },
   ignorePatterns: ['.eslintrc.js'],
 }

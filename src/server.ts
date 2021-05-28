@@ -1,32 +1,24 @@
 import Koa from "koa"
-import cors from "@koa/cors"
+import helmet from "koa-helmet"
 
 import { config } from "./config"
-import helmet from "koa-helmet"
+import { router } from "./routes"
 
 const app = new Koa()
 
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-    dnsPrefetchControl: false,
-    expectCt: true,
-    frameguard: true,
-    hidePoweredBy: false,
-    hsts: true,
-    ieNoOpen: false,
-    noSniff: true,
-    permittedCrossDomainPolicies: true,
-    referrerPolicy: false,
-    xssFilter: false,
-  }),
-)
+// Adds various security headers
+app.use(helmet())
 
-app.use(cors)
-
-app.use(ctx => {
-  ctx.body = "Hello World"
+// Adds CORS header
+app.use(async (ctx, next) => {
+  ctx.set("Access-Control-Allow-Origin", "*")
+  ctx.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+  ctx.set("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE, OPTIONS")
+  await next()
 })
+
+// Register routes
+app.use(router.routes()).use(router.allowedMethods())
 
 app.listen(config.port, () => {
   console.log(`Server running on port ${config.port}`)
