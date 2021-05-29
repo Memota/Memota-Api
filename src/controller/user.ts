@@ -63,4 +63,27 @@ export default class UserController {
       ctx.body = user
     }
   }
+
+  public static async verify(ctx: Context) {
+    // get email token repository
+    const tokenRepository: Repository<EmailVerifyToken> = getManager().getRepository(EmailVerifyToken)
+
+    // try to find token
+    const token: EmailVerifyToken = await tokenRepository.findOne({ token: ctx.params.token }, { relations: ["user"] })
+
+    if (!token) {
+      // return BAD REQUEST status code and token does not exist error
+      ctx.status = 400
+      ctx.body = "The specified token was not found"
+    } else {
+      // set verified status to true
+      token.user.verified = true
+      await tokenRepository.save(token)
+      // delete token
+      await tokenRepository.remove(token)
+      // return OK status code
+      ctx.status = 200
+      ctx.body = "Account verified"
+    }
+  }
 }
