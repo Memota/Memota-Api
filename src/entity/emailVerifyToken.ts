@@ -21,5 +21,5 @@ export class EmailVerifyToken {
   token: string
 
   @CreateDateColumn()
-  createdAt: string
+  createdAt: Date
 }
