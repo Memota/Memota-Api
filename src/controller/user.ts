@@ -45,7 +45,7 @@ export default class UserController {
           locals: {
             uname: userToBeSaved.username,
             token: tokenToBeSaved.token,
-            burl: config.baseUrl,
+            vurl: config.verifyUrl,
           },
         })
       } catch (err) {
@@ -137,7 +137,7 @@ export default class UserController {
           locals: {
             uname: user.username,
             token: tokenToBeSaved.token,
-            burl: config.baseUrl,
+            vurl: config.verifyUrl,
           },
         })
       } catch (err) {

@@ -7,7 +7,7 @@ export interface Config {
   databaseUrl: string
   dbEntitiesPath: string[]
   debugLogging: boolean
-  baseUrl: string
+  verifyUrl: string
   smtpHost: string
   smtpPort: number
   smtpSecure: boolean
@@ -23,7 +23,7 @@ const config: Config = {
   databaseUrl: process.env.DATABASE_URL,
   dbEntitiesPath: [...(isDevMode ? ["src/entity/**/*.ts"] : ["dist/entity/**/*.js"])],
   debugLogging: isDevMode,
-  baseUrl: process.env.BASE_URL,
+  verifyUrl: process.env.VERIFY_URL,
   smtpHost: process.env.SMTP_HOST,
   smtpPort: Number(process.env.SMTP_PORT),
   smtpSecure: process.env.SMTP_SECURE == "true",
