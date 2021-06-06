@@ -5,41 +5,42 @@ module.exports = {
     es6: true,
     node: true,
   },
-  parser: '@typescript-eslint/parser',
+  parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2018,
-    sourceType: 'module',
-    project: resolve(__dirname, './tsconfig.json'),
+    sourceType: "module",
+    project: resolve(__dirname, "./tsconfig.json"),
   },
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'prettier',
-    'plugin:prettier/recommended',
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "prettier",
+    "plugin:prettier/recommended",
+    "plugin:jest/recommended",
   ],
   globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly",
   },
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ["@typescript-eslint", "prettier", "jest"],
   rules: {
-    '@typescript-eslint/member-delimiter-style': ['error', {
+    "@typescript-eslint/member-delimiter-style": ["error", {
       multiline: {
-        delimiter: 'none',
+        delimiter: "none",
         requireLast: true,
       },
       singleline: {
-        delimiter: 'semi',
+        delimiter: "semi",
         requireLast: false,
       },
     }],
-    '@typescript-eslint/unbound-method': [
-      'error',
+    "@typescript-eslint/unbound-method": [
+      "error",
       {
-        'ignoreStatic': true,
+        "ignoreStatic": true,
       },
     ],
   },
-  ignorePatterns: ['.eslintrc.js'],
+  ignorePatterns: [".eslintrc.js"],
 }

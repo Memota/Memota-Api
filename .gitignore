@@ -20,3 +20,6 @@ dist/**/*
 # Logging files
 *.log
 *.pyc
+
+# Test coverage
+coverage

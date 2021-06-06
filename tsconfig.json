@@ -4,7 +4,6 @@
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     /* Strict Type-Checking Options */
     "strict": false,
     "noImplicitAny": true,
@@ -24,9 +23,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
+  "types": ["@types/jest"],
   "lib": ["es6"],
-  "include": ["src/**/*"],
-  "exclude": [
-    "tests"
-  ]
+  "include": ["src/**/*", "tests"],
+  "exclude": ["dist"],
 }

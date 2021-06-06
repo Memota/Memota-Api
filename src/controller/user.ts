@@ -122,7 +122,7 @@ export default class UserController {
       }
 
       // generate new token and save it
-      const tokenToBeSaved: EmailVerifyToken = new EmailVerifyToken();
+      const tokenToBeSaved: EmailVerifyToken = new EmailVerifyToken()
       tokenToBeSaved.token = crypto.randomBytes(6).toString("hex")
       tokenToBeSaved.user = user
       await tokenRepository.save(tokenToBeSaved)

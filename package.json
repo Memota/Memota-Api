@@ -9,11 +9,14 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon --watch src -e ts,tsx --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "cross-env NODE_ENV=production node dist/server.js",
-    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix"
+    "start": "cross-env NODE_ENV=production node dist/src/server.js",
+    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
+    "test": "jest",
+    "test:coverage": "jest --collect-coverage"
   },
   "devDependencies": {
     "@types/email-templates": "^8.0.3",
+    "@types/jest": "^26.0.23",
     "@types/koa": "^2.13.2",
     "@types/koa-bodyparser": "^4.3.0",
     "@types/koa__cors": "^3.0.2",
@@ -26,9 +29,12 @@
     "cross-env": "^7.0.3",
     "eslint": ">=6.2.2",
     "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-jest": "^24.3.6",
     "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^27.0.4",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
+    "ts-jest": "^27.0.2",
     "ts-node": "^10.0.0",
     "typescript": "^3.7.4"
   },
@@ -53,5 +59,20 @@
     "pug": "^3.0.2",
     "typeorm": "^0.2.32",
     "winston": "^3.3.3"
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>"
+    ],
+    "testPathIgnorePatterns": ["dist/"],
+    "testMatch": [
+      "**/tests/**/*.+(ts|tsx|js)"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/src/**/*.ts+(ts|tsx|js)"
+    ]
   }
 }
