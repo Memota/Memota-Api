@@ -36,7 +36,7 @@ export class User {
     type => EmailVerifyToken,
     EmailVerifyToken => EmailVerifyToken.user,
   )
-  verify_token: EmailVerifyToken
+  verifyToken: EmailVerifyToken
 
   @Column({ length: 20, default: "user" })
   @Length(2, 20)

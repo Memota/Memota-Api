@@ -64,7 +64,9 @@
     "roots": [
       "<rootDir>"
     ],
-    "testPathIgnorePatterns": ["dist/"],
+    "testPathIgnorePatterns": [
+      "dist/"
+    ],
     "testMatch": [
       "**/tests/**/*.+(ts|tsx|js)"
     ],
@@ -72,7 +74,7 @@
       "^.+\\.(ts|tsx)$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/src/**/*.ts+(ts|tsx|js)"
+      "**/src/**/*.ts"
     ]
   }
 }

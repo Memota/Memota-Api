@@ -8,7 +8,7 @@ export class EmailVerifyToken {
 
   @OneToOne(
     type => User,
-    User => User.verify_token,
+    User => User.verifyToken,
     {
       cascade: true,
       onDelete: "CASCADE",

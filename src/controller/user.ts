@@ -35,7 +35,6 @@ export default class UserController {
       const tokenToBeSaved: EmailVerifyToken = new EmailVerifyToken()
       tokenToBeSaved.token = crypto.randomBytes(6).toString("hex")
 
-      // send verification mail
       try {
         await email.send({
           template: "register",
@@ -111,14 +110,14 @@ export default class UserController {
       // return BAD REQUEST status code and email not found or user is already verified error
       ctx.status = 400
       ctx.body = "The specified email was not found or the user is already verified"
-    } else if (user.verify_token && user.verify_token.createdAt.getTime() + 15 * 60 * 1000 > new Date().getTime()) {
+    } else if (user.verifyToken && user.verifyToken.createdAt.getTime() + 15 * 60 * 1000 > new Date().getTime()) {
       // return TOO MANY REQUESTS status code
       ctx.status = 429
       ctx.body = "You have to wait before you can resend"
     } else {
       // delete current token if it exists
-      if (user.verify_token) {
-        await tokenRepository.delete(user.verify_token)
+      if (user.verifyToken) {
+        await tokenRepository.remove(user.verifyToken)
       }
 
       // generate new token and save it
