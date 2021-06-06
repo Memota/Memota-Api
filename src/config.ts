@@ -21,7 +21,7 @@ const isDevMode = process.env.NODE_ENV == "development"
 const config: Config = {
   port: +(process.env.PORT || 3000),
   databaseUrl: process.env.DATABASE_URL,
-  dbEntitiesPath: [...(isDevMode ? ["src/entity/**/*.ts"] : ["dist/entity/**/*.js"])],
+  dbEntitiesPath: [...(isDevMode ? ["src/entity/**/*.ts"] : ["dist/src/entity/**/*.js"])],
   debugLogging: isDevMode,
   verifyUrl: process.env.VERIFY_URL,
   smtpHost: process.env.SMTP_HOST,
