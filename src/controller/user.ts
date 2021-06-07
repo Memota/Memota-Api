@@ -100,7 +100,7 @@ export default class UserController {
     })
 
     // try to find user
-    const user: User = await userRepository.findOne({ email: userResendTo.email }, { relations: ["verify_token"] })
+    const user: User = await userRepository.findOne({ email: userResendTo.email }, { relations: ["verifyToken"] })
 
     if (errors.length > 0) {
       // return BAD REQUEST status code and errors array
