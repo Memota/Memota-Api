@@ -55,6 +55,7 @@
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
     "koa-helmet": "^6.1.0",
+    "koa-jwt": "^4.0.1",
     "nodemailer": "^6.6.1",
     "pg": "^8.6.0",
     "pg-connection-string": "^2.5.0",

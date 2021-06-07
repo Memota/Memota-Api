@@ -8,6 +8,7 @@ import { User } from "../entity/user"
 import { EmailVerifyToken } from "../entity/emailVerifyToken"
 import { email } from "../email"
 import { config } from "../config"
+import { PasswordResetToken } from "../entity/passwordResetToken"
 
 export default class UserController {
   public static async createUser(ctx: Context): Promise<void> {
@@ -154,7 +155,8 @@ export default class UserController {
   public static async loginUser(ctx: Context): Promise<void> {
     // get a user repository to perform operations with user
     const userRepository: Repository<User> = getManager().getRepository(User)
-    // build up user entity to be saved
+
+    // build up user entity to use for login
     const userToBeLoggedIn: User = new User()
     userToBeLoggedIn.username = ctx.request.body.username
     userToBeLoggedIn.email = ctx.request.body.email
@@ -170,9 +172,11 @@ export default class UserController {
       ctx.status = 400
       ctx.body = errors
     } else {
+      // try to find existing user with same email and username
       const user: User = await userRepository.findOne({
         where: [{ email: userToBeLoggedIn.email }, { username: userToBeLoggedIn.username }],
       })
+      // compare passwords
       if (!user || !(await user.compareHash(userToBeLoggedIn.password))) {
         ctx.status = 400
         ctx.body = "Username/Email was not found or password is invalid"
@@ -180,9 +184,130 @@ export default class UserController {
         ctx.status = 401
         ctx.body = "Specified User has not been verified yet"
       } else {
+        // create new jwt for authentication that expires in 1 month
         const token = jwt.sign({ sub: user.id, role: user.role }, config.jwtSecret, { expiresIn: "30d" })
         ctx.status = 200
         ctx.body = { token: token }
+      }
+    }
+  }
+
+  public static async getProfile(ctx: Context): Promise<void> {
+    // get a user repository to perform operations with user
+    const userRepository: Repository<User> = getManager().getRepository(User)
+    // try to find user
+    const user: User = await userRepository.findOne({
+      id: ctx.state.user.sub,
+    })
+    if (!user) {
+      ctx.status = 401
+      ctx.body = "User not found"
+    } else {
+      // return user and delete password for safety
+      delete user.password
+      ctx.status = 200
+      ctx.body = user
+    }
+  }
+
+  public static async sendPasswordReset(ctx: Context): Promise<void> {
+    // get a user repository to perform operations with user
+    const userRepository: Repository<User> = getManager().getRepository(User)
+    const tokenRepository: Repository<PasswordResetToken> = getManager().getRepository(PasswordResetToken)
+
+    // build up user entity to send password reset email
+    const userToResetPasswordFor: User = new User()
+    userToResetPasswordFor.email = ctx.request.body.email
+
+    // validate user entity for sending the password reset request
+    const errors: ValidationError[] = await validate(userToResetPasswordFor, {
+      groups: ["send-reset"],
+      validationError: { target: false },
+    })
+    if (errors.length > 0) {
+      // return BAD REQUEST status code and errors array
+      ctx.status = 400
+      ctx.body = errors
+    } else {
+      const user: User = await userRepository.findOne(
+        { email: userToResetPasswordFor.email },
+        { relations: ["resetToken"] },
+      )
+      if (!user) {
+        ctx.status = 401
+        ctx.body = "User not found"
+      } else if (!user.verified) {
+        ctx.status = 401
+        ctx.body = "Specified User has not been verified yet"
+      } else {
+        if (user.resetToken) {
+          await tokenRepository.remove(user.resetToken)
+        }
+        // generate new token to reset the password with
+        const tokenToBeSaved: PasswordResetToken = new PasswordResetToken()
+        tokenToBeSaved.token = crypto.randomBytes(6).toString("hex")
+        tokenToBeSaved.user = user
+        await tokenRepository.save(tokenToBeSaved)
+
+        // TODO: Change email template
+        try {
+          await email.send({
+            template: "register",
+            message: {
+              to: user.email,
+            },
+            locals: {
+              uname: user.username,
+              token: tokenToBeSaved.token,
+              vurl: config.verifyUrl,
+            },
+          })
+        } catch (err) {
+          console.log(err)
+          ctx.throw(500, "Could not send email")
+        }
+        // return OK status code
+        ctx.status = 200
+        ctx.body = "Email has been sent"
+      }
+    }
+  }
+
+  public static async resetPassword(ctx: Context): Promise<void> {
+    // get a user repository to perform operations with user
+    const tokenRepository: Repository<PasswordResetToken> = getManager().getRepository(PasswordResetToken)
+
+    // create user object with provided password
+    const userToResetPasswordFor: User = new User()
+    userToResetPasswordFor.password = ctx.request.body.password
+
+    const errors: ValidationError[] = await validate(userToResetPasswordFor, {
+      groups: ["password-reset"],
+      validationError: { target: false },
+    })
+    if (errors.length > 0) {
+      // return BAD REQUEST status code and errors array
+      ctx.status = 400
+      ctx.body = errors
+    } else {
+      // try to find token
+      const token: PasswordResetToken = await tokenRepository.findOne(
+        { token: ctx.request.body.token },
+        { relations: ["user"] },
+      )
+      if (!token) {
+        ctx.status = 400
+        ctx.body = "The specified token was not found"
+      } else {
+        // set new user password
+        await userToResetPasswordFor.hashPassword()
+        token.user.password = userToResetPasswordFor.password
+        await tokenRepository.save(token)
+        // delete token
+        await tokenRepository.remove(token)
+        // return OK status code
+        ctx.status = 200
+        ctx.body = "Password has been reset"
       }
     }
   }
