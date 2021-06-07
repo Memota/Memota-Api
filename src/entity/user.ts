@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { Length, IsEmail, IsOptional, ValidateIf, Matches } from "class-validator"
 import { IsUniq } from "@join-com/typeorm-class-validator-is-uniq"
-import { hash } from "bcrypt"
+import { hash, compare } from "bcrypt"
 
 import { EmailVerifyToken } from "./emailVerifyToken"
 
@@ -45,6 +45,10 @@ export class User {
 
   async hashPassword() {
     this.password = await hash(this.password, 10)
+  }
+
+  async compareHash(password: string): Promise<boolean> {
+    return compare(password, this.password)
   }
 }
 

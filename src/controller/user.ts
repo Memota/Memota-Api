@@ -2,6 +2,7 @@ import { Context } from "koa"
 import { getManager, Repository } from "typeorm"
 import { validate, ValidationError } from "class-validator"
 import crypto from "crypto"
+import jwt from "jsonwebtoken"
 
 import { User } from "../entity/user"
 import { EmailVerifyToken } from "../entity/emailVerifyToken"
@@ -85,6 +86,7 @@ export default class UserController {
       ctx.body = "Account verified"
     }
   }
+
   public static async resend(ctx: Context) {
     const userRepository: Repository<User> = getManager().getRepository(User)
     const tokenRepository: Repository<EmailVerifyToken> = getManager().getRepository(EmailVerifyToken)
@@ -146,6 +148,42 @@ export default class UserController {
       // return OK status code
       ctx.status = 200
       ctx.body = "Email has been sent"
+    }
+  }
+
+  public static async loginUser(ctx: Context): Promise<void> {
+    // get a user repository to perform operations with user
+    const userRepository: Repository<User> = getManager().getRepository(User)
+    // build up user entity to be saved
+    const userToBeLoggedIn: User = new User()
+    userToBeLoggedIn.username = ctx.request.body.username
+    userToBeLoggedIn.email = ctx.request.body.email
+    userToBeLoggedIn.password = ctx.request.body.password
+
+    // validate user entity
+    const errors: ValidationError[] = await validate(userToBeLoggedIn, {
+      groups: ["login"],
+      validationError: { target: false },
+    })
+    if (errors.length > 0) {
+      // return BAD REQUEST status code and errors array
+      ctx.status = 400
+      ctx.body = errors
+    } else {
+      const user: User = await userRepository.findOne({
+        where: [{ email: userToBeLoggedIn.email }, { username: userToBeLoggedIn.username }],
+      })
+      if (!user || !(await user.compareHash(userToBeLoggedIn.password))) {
+        ctx.status = 400
+        ctx.body = "Username/Email was not found or password is invalid"
+      } else if (!user.verified) {
+        ctx.status = 401
+        ctx.body = "Specified User has not been verified yet"
+      } else {
+        const token = jwt.sign({ sub: user.id, role: user.role }, config.jwtSecret, { expiresIn: "30d" })
+        ctx.status = 200
+        ctx.body = { token: token }
+      }
     }
   }
 }

@@ -14,6 +14,7 @@ export interface Config {
   smtpUser: string
   smtpPass: string
   mailSender: string
+  jwtSecret: string
 }
 
 const isDevMode = process.env.NODE_ENV == "development"
@@ -30,6 +31,7 @@ const config: Config = {
   smtpUser: process.env.SMTP_USER,
   smtpPass: process.env.SMTP_PASS,
   mailSender: process.env.MAIL_SENDER,
+  jwtSecret: process.env.JWT_SECRET,
 }
 
 export { config }
