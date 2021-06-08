@@ -1,33 +1,55 @@
 import Koa from "koa"
-import cors from "@koa/cors"
+import helmet from "koa-helmet"
+import { createConnection } from "typeorm"
+import koaBody from "koa-body"
+import * as PostgressConnectionStringParser from "pg-connection-string"
+import winston from "winston"
 
 import { config } from "./config"
-import helmet from "koa-helmet"
+import { router } from "./routes"
+import { logger } from "./logger"
 
-const app = new Koa()
+const connectionOptions = PostgressConnectionStringParser.parse(config.databaseUrl)
 
-app.use(
-  helmet({
-    contentSecurityPolicy: false,
-    dnsPrefetchControl: false,
-    expectCt: true,
-    frameguard: true,
-    hidePoweredBy: false,
-    hsts: true,
-    ieNoOpen: false,
-    noSniff: true,
-    permittedCrossDomainPolicies: true,
-    referrerPolicy: false,
-    xssFilter: false,
-  }),
-)
-
-app.use(cors)
-
-app.use(ctx => {
-  ctx.body = "Hello World"
+createConnection({
+  type: "postgres",
+  host: connectionOptions.host,
+  port: +connectionOptions.port,
+  username: connectionOptions.user,
+  password: connectionOptions.password,
+  database: connectionOptions.database,
+  synchronize: true,
+  logging: false,
+  entities: config.dbEntitiesPath,
+  extra: {
+    ssl: connectionOptions.ssl === undefined ? true : connectionOptions.ssl == "true", // Defaults to true when it isn't set in connection string
+  },
 })
+  .then(connection => {
+    const app = new Koa()
 
-app.listen(config.port, () => {
-  console.log(`Server running on port ${config.port}`)
-})
+    // Adds various security headers
+    app.use(helmet())
+
+    // Adds CORS header
+    app.use(async (ctx, next) => {
+      ctx.set("Access-Control-Allow-Origin", "*")
+      ctx.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+      ctx.set("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE, OPTIONS")
+      await next()
+    })
+
+    // Logger middleware
+    app.use(logger(winston))
+
+    // Parse request body
+    app.use(koaBody())
+
+    // Register routes
+    app.use(router.routes()).use(router.allowedMethods())
+
+    app.listen(config.port, () => {
+      console.log(`Server running on port ${config.port}`)
+    })
+  })
+  .catch(error => console.log("TypeORM connection error: ", error))

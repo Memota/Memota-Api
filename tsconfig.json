@@ -1,22 +1,30 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2017",
     "module": "commonjs",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     /* Strict Type-Checking Options */
-    "strict": true,
+    "strict": false,
     "noImplicitAny": true,
     /* Module Resolution Options */
     "moduleResolution": "node",
-    "baseUrl": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "*": [
+        "node_modules/*"
+      ]
+    },
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     /* Advanced Options */
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
-  "lib": ["es2015"],
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "types": ["@types/jest"],
+  "lib": ["es6"],
+  "include": ["src/**/*", "tests"],
+  "exclude": ["dist"],
 }

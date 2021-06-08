@@ -7,30 +7,74 @@
   "main": "src/server.ts",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/server.ts",
-    "build": "sucrase ./src -d ./dist --transforms typescript,imports",
-    "start": "node dist/server.js",
-    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix"
+    "dev": "cross-env NODE_ENV=development nodemon --watch src -e ts,tsx --exec ts-node src/server.ts",
+    "build": "tsc",
+    "start": "cross-env NODE_ENV=production node dist/src/server.js",
+    "lint": "tsc --noEmit && eslint \"**/*.{js,ts}\" --quiet --fix",
+    "test": "jest",
+    "test:coverage": "jest --collect-coverage"
   },
   "devDependencies": {
+    "@types/email-templates": "^8.0.3",
+    "@types/jest": "^26.0.23",
     "@types/koa": "^2.13.2",
+    "@types/koa-bodyparser": "^4.3.0",
     "@types/koa__cors": "^3.0.2",
+    "@types/koa__router": "^8.0.4",
     "@types/node": "^15.6.1",
+    "@types/nodemailer": "^6.4.2",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^2.16.0",
     "@typescript-eslint/parser": "^2.16.0",
+    "cross-env": "^7.0.3",
     "eslint": ">=6.2.2",
     "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-jest": "^24.3.6",
     "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^27.0.4",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
-    "sucrase": "^3.12.1",
+    "ts-jest": "^27.0.2",
+    "ts-node": "^10.0.0",
     "typescript": "^3.7.4"
   },
   "dependencies": {
+    "@danfebooks/nodemailer-sendgrid-transport": "^0.4.0",
+    "@join-com/typeorm-class-validator-is-uniq": "^2.0.0",
     "@koa/cors": "^3.1.0",
+    "@koa/router": "^10.0.0",
+    "@types/bcrypt": "^5.0.0",
+    "bcrypt": "^5.0.1",
+    "class-validator": "^0.13.1",
+    "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
+    "email-templates": "^8.0.7",
     "express": "^4.17.1",
     "koa": "^2.13.1",
-    "koa-helmet": "^6.1.0"
+    "koa-body": "^4.2.0",
+    "koa-helmet": "^6.1.0",
+    "nodemailer": "^6.6.1",
+    "pg": "^8.6.0",
+    "pg-connection-string": "^2.5.0",
+    "pug": "^3.0.2",
+    "typeorm": "^0.2.32",
+    "winston": "^3.3.3"
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>"
+    ],
+    "testPathIgnorePatterns": [
+      "dist/"
+    ],
+    "testMatch": [
+      "**/tests/**/*.+(ts|tsx|js)"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/src/**/*.ts"
+    ]
   }
 }
