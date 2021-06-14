@@ -46,7 +46,7 @@ export default class UserController {
           locals: {
             uname: userToBeSaved.username,
             token: tokenToBeSaved.token,
-            vurl: config.verifyUrl,
+            vurl: config.baseUrl + "users/verify/",
           },
         })
       } catch (err) {
@@ -139,7 +139,7 @@ export default class UserController {
           locals: {
             uname: user.username,
             token: tokenToBeSaved.token,
-            vurl: config.verifyUrl,
+            vurl: config.baseUrl + "users/verify/",
           },
         })
       } catch (err) {
@@ -249,17 +249,16 @@ export default class UserController {
         tokenToBeSaved.user = user
         await tokenRepository.save(tokenToBeSaved)
 
-        // TODO: Change email template
         try {
           await email.send({
-            template: "register",
+            template: "login",
             message: {
               to: user.email,
             },
             locals: {
               uname: user.username,
               token: tokenToBeSaved.token,
-              vurl: config.verifyUrl,
+              rurl: config.baseUrl + "users/password-reset/",
             },
           })
         } catch (err) {
