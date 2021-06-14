@@ -239,6 +239,10 @@ export default class UserController {
       } else if (!user.verified) {
         ctx.status = 401
         ctx.body = "Specified User has not been verified yet"
+      } else if (user.resetToken && user.resetToken.createdAt.getTime() + 60 * 1000 > new Date().getTime()) {
+        // return TOO MANY REQUESTS status code
+        ctx.status = 429
+        ctx.body = "You have to wait before you can request another password reset"
       } else {
         if (user.resetToken) {
           await tokenRepository.remove(user.resetToken)
@@ -297,6 +301,9 @@ export default class UserController {
       if (!token) {
         ctx.status = 400
         ctx.body = "The specified token was not found"
+      } else if (token.createdAt.getTime() + 2 * 60 * 60 * 1000 < new Date().getTime()) {
+        ctx.status = 401
+        ctx.body = "This password reset token has expired"
       } else {
         // set new user password
         await userToResetPasswordFor.hashPassword()
