@@ -50,6 +50,9 @@ export class User {
   @IsOptional()
   role: string
 
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt: Date
+
   async hashPassword() {
     this.password = await hash(this.password, 10)
   }

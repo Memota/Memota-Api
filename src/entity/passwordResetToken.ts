@@ -20,6 +20,6 @@ export class PasswordResetToken {
   @Column({ length: 100 })
   token: string
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
 }

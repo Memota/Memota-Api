@@ -11,7 +11,7 @@ router.post("/verify/:token", user.verify)
 router.post("/resend", user.resend)
 router.post("/login", user.loginUser)
 router.post("/send-reset", user.sendPasswordReset)
-router.post("/password-reset", user.resetPassword)
+router.post("/reset", user.resetPassword)
 
 router.get("/profile", jwt({ secret: config.jwtSecret }), user.getProfile)
 

@@ -153,7 +153,6 @@ export default class UserController {
   }
 
   public static async loginUser(ctx: Context): Promise<void> {
-    // get a user repository to perform operations with user
     const userRepository: Repository<User> = getManager().getRepository(User)
 
     // build up user entity to use for login
@@ -193,7 +192,6 @@ export default class UserController {
   }
 
   public static async getProfile(ctx: Context): Promise<void> {
-    // get a user repository to perform operations with user
     const userRepository: Repository<User> = getManager().getRepository(User)
     // try to find user
     const user: User = await userRepository.findOne({
@@ -211,7 +209,6 @@ export default class UserController {
   }
 
   public static async sendPasswordReset(ctx: Context): Promise<void> {
-    // get a user repository to perform operations with user
     const userRepository: Repository<User> = getManager().getRepository(User)
     const tokenRepository: Repository<PasswordResetToken> = getManager().getRepository(PasswordResetToken)
 
@@ -262,7 +259,7 @@ export default class UserController {
             locals: {
               uname: user.username,
               token: tokenToBeSaved.token,
-              rurl: config.baseUrl + "users/password-reset/",
+              rurl: config.baseUrl + "users/reset/",
             },
           })
         } catch (err) {
@@ -277,7 +274,6 @@ export default class UserController {
   }
 
   public static async resetPassword(ctx: Context): Promise<void> {
-    // get a user repository to perform operations with user
     const tokenRepository: Repository<PasswordResetToken> = getManager().getRepository(PasswordResetToken)
 
     // create user object with provided password
@@ -308,6 +304,7 @@ export default class UserController {
         // set new user password
         await userToResetPasswordFor.hashPassword()
         token.user.password = userToResetPasswordFor.password
+        // save user
         await tokenRepository.save(token)
         // delete token
         await tokenRepository.remove(token)
