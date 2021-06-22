@@ -7,13 +7,14 @@ export interface Config {
   databaseUrl: string
   dbEntitiesPath: string[]
   debugLogging: boolean
-  verifyUrl: string
+  baseUrl: string
   smtpHost: string
   smtpPort: number
   smtpSecure: boolean
   smtpUser: string
   smtpPass: string
   mailSender: string
+  jwtSecret: string
 }
 
 const isDevMode = process.env.NODE_ENV == "development"
@@ -23,13 +24,14 @@ const config: Config = {
   databaseUrl: process.env.DATABASE_URL,
   dbEntitiesPath: [...(isDevMode ? ["src/entity/**/*.ts"] : ["dist/src/entity/**/*.js"])],
   debugLogging: isDevMode,
-  verifyUrl: process.env.VERIFY_URL,
+  baseUrl: process.env.BASE_URL,
   smtpHost: process.env.SMTP_HOST,
   smtpPort: Number(process.env.SMTP_PORT),
   smtpSecure: process.env.SMTP_SECURE == "true",
   smtpUser: process.env.SMTP_USER,
   smtpPass: process.env.SMTP_PASS,
   mailSender: process.env.MAIL_SENDER,
+  jwtSecret: process.env.JWT_SECRET,
 }
 
 export { config }

@@ -1,9 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn } from "typeorm"
 import { Length, IsEmail, IsOptional, ValidateIf, Matches } from "class-validator"
 import { IsUniq } from "@join-com/typeorm-class-validator-is-uniq"
-import { hash } from "bcrypt"
+import { hash, compare } from "bcrypt"
 
 import { EmailVerifyToken } from "./emailVerifyToken"
+import { PasswordResetToken } from "./passwordResetToken"
 
 @Entity()
 export class User {
@@ -12,20 +13,20 @@ export class User {
 
   @Matches(new RegExp("^[a-zA-Z0-9_]+$"), { groups: ["register"] })
   @Column({ length: 32, unique: true })
-  @Length(3, 32, { groups: ["register", "login", "send-reset"] })
+  @Length(3, 32, { groups: ["register", "login"] })
   @IsUniq({ groups: ["register"] })
-  @ValidateIf(o => o.email == undefined, { groups: ["login", "send-reset"] })
+  @ValidateIf(o => o.email == undefined, { groups: ["login"] })
   username: string
 
   @Column({ length: 64 })
-  @Length(5, 64, { groups: ["register", "login"] })
+  @Length(5, 64, { groups: ["register", "login", "password-reset"] })
   password: string
 
   @Column({ length: 64, unique: true })
   @Length(5, 64, { groups: ["register", "login", "resend", "send-reset"] })
   @IsEmail(undefined, { groups: ["register", "login", "resend", "send-reset"] })
   @IsUniq({ groups: ["register"] })
-  @IsOptional({ groups: ["login", "send-reset"] })
+  @IsOptional({ groups: ["login"] })
   email: string
 
   @Column({ default: false })
@@ -38,13 +39,26 @@ export class User {
   )
   verifyToken: EmailVerifyToken
 
+  @OneToOne(
+    type => PasswordResetToken,
+    PasswordResetToken => PasswordResetToken.user,
+  )
+  resetToken: PasswordResetToken
+
   @Column({ length: 20, default: "user" })
   @Length(2, 20)
   @IsOptional()
   role: string
 
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt: Date
+
   async hashPassword() {
     this.password = await hash(this.password, 10)
+  }
+
+  async compareHash(password: string): Promise<boolean> {
+    return compare(password, this.password)
   }
 }
 

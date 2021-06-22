@@ -2,13 +2,13 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToOne, Joi
 import { User } from "./user"
 
 @Entity()
-export class EmailVerifyToken {
+export class PasswordResetToken {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
   @OneToOne(
     type => User,
-    User => User.verifyToken,
+    User => User.resetToken,
     {
       cascade: true,
       onDelete: "CASCADE",
