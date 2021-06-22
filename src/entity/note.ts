@@ -1,4 +1,4 @@
-import { Length } from "class-validator"
+import { IsOptional, Length } from "class-validator"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, UpdateDateColumn } from "typeorm"
 import { User } from "./user"
 
@@ -18,10 +18,12 @@ export class Note {
 
   @Column({ length: 50 })
   @Length(0, 50)
+  @IsOptional({ groups: ["patch"] })
   title: string
 
   @Column({ length: 10000 })
   @Length(0, 10000)
+  @IsOptional({ groups: ["patch"] })
   text: string
 
   @CreateDateColumn({ type: "timestamptz" })
