@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken"
 
 import { User } from "../entity/user"
 import { EmailVerifyToken } from "../entity/emailVerifyToken"
-import { email } from "../email"
+import { sendResetMail, sendVerifyMail } from "../email"
 import { config } from "../config"
 import { PasswordResetToken } from "../entity/passwordResetToken"
 
@@ -37,23 +37,13 @@ export default class AuthController {
       const tokenToBeSaved: EmailVerifyToken = new EmailVerifyToken()
       tokenToBeSaved.token = crypto.randomBytes(6).toString("hex")
 
+      // send verification mail
       try {
-        await email.send({
-          template: "verify",
-          message: {
-            to: userToBeSaved.email,
-          },
-          locals: {
-            uname: userToBeSaved.username,
-            token: tokenToBeSaved.token,
-            vurl: config.baseUrl + "auth/verify/",
-          },
-        })
+        await sendVerifyMail(userToBeSaved, tokenToBeSaved)
       } catch (err) {
         console.log(err)
         ctx.throw(500, "Could not send email")
       }
-
       const user = await userRepository.save(userToBeSaved)
       tokenToBeSaved.user = user
       await tokenRepository.save(tokenToBeSaved)
@@ -131,17 +121,7 @@ export default class AuthController {
 
       // send verification mail
       try {
-        await email.send({
-          template: "verify",
-          message: {
-            to: user.email,
-          },
-          locals: {
-            uname: user.username,
-            token: tokenToBeSaved.token,
-            vurl: config.baseUrl + "auth/verify/",
-          },
-        })
+        await sendVerifyMail(user, tokenToBeSaved)
       } catch (err) {
         console.log(err)
         ctx.throw(500, "Could not send email")
@@ -234,17 +214,7 @@ export default class AuthController {
         await tokenRepository.save(tokenToBeSaved)
 
         try {
-          await email.send({
-            template: "reset",
-            message: {
-              to: user.email,
-            },
-            locals: {
-              uname: user.username,
-              token: tokenToBeSaved.token,
-              rurl: config.baseUrl + "auth/reset/",
-            },
-          })
+          await sendResetMail(user, tokenToBeSaved)
         } catch (err) {
           console.log(err)
           ctx.throw(500, "Could not send email")

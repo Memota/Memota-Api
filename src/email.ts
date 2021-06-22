@@ -2,6 +2,8 @@ import nodemailer from "nodemailer"
 import Email from "email-templates"
 
 import { config } from "./config"
+import { User } from "./entity/user"
+import { PasswordResetToken } from "./entity/passwordResetToken"
 
 // create an SMTP transporter to send Mails
 const transporter = nodemailer.createTransport({
@@ -15,7 +17,7 @@ const transporter = nodemailer.createTransport({
 })
 
 // Prepare Mailer default settings
-export const email = new Email({
+const email = new Email({
   message: {
     from: config.mailSender,
   },
@@ -23,3 +25,31 @@ export const email = new Email({
   send: true,
   preview: false,
 })
+
+export async function sendVerifyMail(user: User, token: PasswordResetToken) {
+  await email.send({
+    template: "verify",
+    message: {
+      to: user.email,
+    },
+    locals: {
+      uname: user.username,
+      token: token.token,
+      vurl: config.baseUrl + "auth/verify/",
+    },
+  })
+}
+
+export async function sendResetMail(user: User, token: PasswordResetToken) {
+  await email.send({
+    template: "reset",
+    message: {
+      to: user.email,
+    },
+    locals: {
+      uname: user.username,
+      token: token.token,
+      rurl: config.baseUrl + "auth/reset/",
+    },
+  })
+}
