@@ -39,7 +39,7 @@ export default class UserController {
 
       try {
         await email.send({
-          template: "register",
+          template: "verify",
           message: {
             to: userToBeSaved.email,
           },
@@ -132,7 +132,7 @@ export default class UserController {
       // send verification mail
       try {
         await email.send({
-          template: "register",
+          template: "verify",
           message: {
             to: user.email,
           },
@@ -252,7 +252,7 @@ export default class UserController {
 
         try {
           await email.send({
-            template: "login",
+            template: "reset",
             message: {
               to: user.email,
             },
