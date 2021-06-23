@@ -66,6 +66,32 @@ export default class NoteController {
     }
   }
 
+  public static async getNote(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+
+    // try to find user
+    const note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user"],
+      },
+    )
+
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else if (note.user.id !== ctx.state.user.sub) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      // add note to the users notes and save
+      ctx.status = 200
+      ctx.body = note
+    }
+  }
+
   public static async patchNote(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 

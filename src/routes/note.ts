@@ -10,5 +10,6 @@ router.post("/", jwt({ secret: config.jwtSecret }), note.createNote)
 router.get("/", jwt({ secret: config.jwtSecret }), note.getNotes)
 router.patch("/:id", jwt({ secret: config.jwtSecret }), note.patchNote)
 router.delete("/:id", jwt({ secret: config.jwtSecret }), note.deleteNote)
+router.get("/:id", jwt({ secret: config.jwtSecret }), note.getNote)
 
 export { router as note }
