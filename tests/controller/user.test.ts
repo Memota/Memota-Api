@@ -24,6 +24,9 @@ jest.mock("typeorm", () => {
     OneToOne: doNothing,
     JoinColumn: doNothing,
     CreateDateColumn: doNothing,
+    ManyToOne: doNothing,
+    OneToMany: doNothing,
+    UpdateDateColumn: doNothing,
   }
 })
 

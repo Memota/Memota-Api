@@ -7,7 +7,6 @@ import AuthController from "../../src/controller/auth"
 import { User } from "../../src/entity/user"
 import { EmailVerifyToken } from "../../src/entity/emailVerifyToken"
 import { PasswordResetToken } from "../../src/entity/passwordResetToken"
-import { email } from "../../src/email"
 import { config } from "../../src/config"
 
 let user: User
@@ -31,6 +30,9 @@ jest.mock("typeorm", () => {
     OneToOne: doNothing,
     JoinColumn: doNothing,
     CreateDateColumn: doNothing,
+    ManyToOne: doNothing,
+    OneToMany: doNothing,
+    UpdateDateColumn: doNothing,
   }
 })
 
@@ -58,10 +60,12 @@ jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
   }
 })
 
-const emailMock = jest.fn()
 jest.mock("../../src/email", () => {
   return {
-    email: { send: (): void => emailMock() },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    sendVerifyMail: () => {},
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    sendResetMail: () => {},
   }
 })
 
@@ -102,8 +106,6 @@ beforeEach(async () => {
   resetToken.user = user
   resetToken.createdAt = new Date(new Date().setDate(new Date().getDate() + 1))
   user.resetToken = resetToken
-
-  emailMock.mockClear()
 })
 
 describe("User controller", () => {
@@ -119,7 +121,6 @@ describe("User controller", () => {
 
     expect(userRepository.save).toHaveBeenCalledTimes(1)
     expect(tokenRepository.save).toHaveBeenCalledTimes(1)
-    expect(emailMock).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(201)
     expect((context.body as User).password).toBeUndefined()
     expect(context.body).toStrictEqual(user)
@@ -189,7 +190,6 @@ describe("User controller", () => {
 
     expect(tokenRepository.save).toHaveBeenCalledTimes(1)
     expect(tokenRepository.remove).toHaveBeenCalledTimes(1)
-    expect(emailMock).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(200)
     expect(context.body).toStrictEqual("Email has been sent")
   })
@@ -212,7 +212,6 @@ describe("User controller", () => {
 
     expect(tokenRepository.save).toHaveBeenCalledTimes(0)
     expect(tokenRepository.remove).toHaveBeenCalledTimes(0)
-    expect(emailMock).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(400)
     expect(context.body).toStrictEqual("The specified email was not found or the user is already verified")
   })
@@ -233,7 +232,6 @@ describe("User controller", () => {
 
     expect(tokenRepository.save).toHaveBeenCalledTimes(0)
     expect(tokenRepository.remove).toHaveBeenCalledTimes(0)
-    expect(emailMock).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(400)
     expect(context.body).toStrictEqual("The specified email was not found or the user is already verified")
   })
@@ -256,7 +254,6 @@ describe("User controller", () => {
 
     expect(tokenRepository.save).toHaveBeenCalledTimes(0)
     expect(tokenRepository.remove).toHaveBeenCalledTimes(0)
-    expect(emailMock).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(429)
     expect(context.body).toStrictEqual("You have to wait before you can resend")
   })
@@ -324,7 +321,6 @@ describe("User controller", () => {
     expect(tokenRepository.save).toHaveBeenCalledTimes(1)
     // old reset token was removed
     expect(tokenRepository.remove).toHaveBeenCalledTimes(1)
-    expect(emailMock).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(200)
     expect(context.body).toStrictEqual("Email has been sent")
   })
@@ -345,7 +341,6 @@ describe("User controller", () => {
 
     expect(tokenRepository.save).toHaveBeenCalledTimes(0)
     expect(tokenRepository.remove).toHaveBeenCalledTimes(0)
-    expect(emailMock).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(401)
     expect(context.body).toStrictEqual("User not found")
   })
@@ -366,7 +361,6 @@ describe("User controller", () => {
 
     expect(tokenRepository.save).toHaveBeenCalledTimes(0)
     expect(tokenRepository.remove).toHaveBeenCalledTimes(0)
-    expect(emailMock).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(401)
     expect(context.body).toStrictEqual("Specified User has not been verified yet")
   })
@@ -391,7 +385,6 @@ describe("User controller", () => {
 
     expect(tokenRepository.save).toHaveBeenCalledTimes(0)
     expect(tokenRepository.remove).toHaveBeenCalledTimes(0)
-    expect(emailMock).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(429)
     expect(context.body).toStrictEqual("You have to wait before you can request another password reset")
   })

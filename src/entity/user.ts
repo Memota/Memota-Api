@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn, OneToMany } from "typeorm"
 import { Length, IsEmail, IsOptional, ValidateIf, Matches } from "class-validator"
 import { IsUniq } from "@join-com/typeorm-class-validator-is-uniq"
 import { hash, compare } from "bcrypt"
 
 import { EmailVerifyToken } from "./emailVerifyToken"
 import { PasswordResetToken } from "./passwordResetToken"
+import { Note } from "./note"
 
 @Entity()
 export class User {
@@ -49,6 +50,15 @@ export class User {
   @Length(2, 20)
   @IsOptional()
   role: string
+
+  @OneToMany(
+    () => Note,
+    note => note.user,
+    {
+      cascade: true,
+    },
+  )
+  notes: Note[]
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
