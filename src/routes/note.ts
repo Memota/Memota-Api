@@ -6,10 +6,10 @@ import { config } from "../config"
 
 const router = new Router()
 
-router.post("/", jwt({ secret: config.jwtSecret }), note.createNote)
-router.get("/", jwt({ secret: config.jwtSecret }), note.getNotes)
-router.patch("/:id", jwt({ secret: config.jwtSecret }), note.patchNote)
-router.delete("/:id", jwt({ secret: config.jwtSecret }), note.deleteNote)
-router.get("/:id", jwt({ secret: config.jwtSecret }), note.getNote)
+router.post("/", jwt({ secret: config.jwtSecret }), note.create)
+router.get("/", jwt({ secret: config.jwtSecret }), note.index)
+router.patch("/:id", jwt({ secret: config.jwtSecret }), note.update)
+router.delete("/:id", jwt({ secret: config.jwtSecret }), note.delete)
+router.get("/:id", jwt({ secret: config.jwtSecret }), note.show)
 
 export { router as note }

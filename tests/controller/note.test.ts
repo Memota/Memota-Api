@@ -100,7 +100,7 @@ describe("Note controller", () => {
       state: { user: { sub: user.id } },
     } as unknown) as Context
 
-    await NoteController.createNote(context)
+    await NoteController.create(context)
 
     expect(userRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.save).toHaveBeenCalledTimes(1)
@@ -122,7 +122,7 @@ describe("Note controller", () => {
       state: { user: { sub: user.id } },
     } as unknown) as Context
 
-    await NoteController.createNote(context)
+    await NoteController.create(context)
 
     expect(userRepository.findOne).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(401)
@@ -143,7 +143,7 @@ describe("Note controller", () => {
       state: { user: { sub: user.id } },
     } as unknown) as Context
 
-    await NoteController.createNote(context)
+    await NoteController.create(context)
 
     expect(context.status).toBe(400)
     expect(context.body).toEqual(["validation error"])
@@ -162,7 +162,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.getNote(context)
+    await NoteController.show(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(200)
@@ -182,7 +182,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.getNote(context)
+    await NoteController.show(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(404)
@@ -202,7 +202,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.getNote(context)
+    await NoteController.show(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(401)
@@ -221,7 +221,7 @@ describe("Note controller", () => {
       state: { user: { sub: user.id } },
     } as unknown) as Context
 
-    await NoteController.getNotes(context)
+    await NoteController.index(context)
 
     expect(userRepository.findOne).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(200)
@@ -240,7 +240,7 @@ describe("Note controller", () => {
       state: { user: { sub: user.id } },
     } as unknown) as Context
 
-    await NoteController.getNotes(context)
+    await NoteController.index(context)
 
     expect(userRepository.findOne).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(401)
@@ -263,7 +263,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.patchNote(context)
+    await NoteController.update(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.save).toHaveBeenCalledTimes(1)
@@ -290,7 +290,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.patchNote(context)
+    await NoteController.update(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.save).toHaveBeenCalledTimes(1)
@@ -318,7 +318,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.patchNote(context)
+    await NoteController.update(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.save).toHaveBeenCalledTimes(1)
@@ -345,7 +345,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.patchNote(context)
+    await NoteController.update(context)
 
     expect(noteRepository.save).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(400)
@@ -368,7 +368,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.patchNote(context)
+    await NoteController.update(context)
 
     expect(noteRepository.save).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(404)
@@ -391,7 +391,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.patchNote(context)
+    await NoteController.update(context)
 
     expect(noteRepository.save).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(401)
@@ -411,7 +411,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.deleteNote(context)
+    await NoteController.delete(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.remove).toHaveBeenCalledTimes(1)
@@ -433,7 +433,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.deleteNote(context)
+    await NoteController.delete(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.remove).toHaveBeenCalledTimes(0)
@@ -454,7 +454,7 @@ describe("Note controller", () => {
       params: { id: note.id },
     } as unknown) as Context
 
-    await NoteController.deleteNote(context)
+    await NoteController.delete(context)
 
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.remove).toHaveBeenCalledTimes(0)

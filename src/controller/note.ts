@@ -5,8 +5,8 @@ import { getManager, Repository } from "typeorm"
 import { User } from "../entity/user"
 import { validate, ValidationError } from "class-validator"
 
-export default class NoteController {
-  public static async createNote(ctx: Context): Promise<void> {
+export default class NotesController {
+  public static async create(ctx: Context): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 
@@ -45,7 +45,7 @@ export default class NoteController {
       }
     }
   }
-  public static async getNotes(ctx: Context): Promise<void> {
+  public static async index(ctx: Context): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
     // try to find user
     const user: User = await userRepository.findOne(
@@ -66,7 +66,7 @@ export default class NoteController {
     }
   }
 
-  public static async getNote(ctx: Context): Promise<void> {
+  public static async show(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 
     // try to find user
@@ -92,7 +92,7 @@ export default class NoteController {
     }
   }
 
-  public static async patchNote(ctx: Context): Promise<void> {
+  public static async update(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 
     const noteToBePatched: Note = new Note()
@@ -140,7 +140,7 @@ export default class NoteController {
     }
   }
 
-  public static async deleteNote(ctx: Context): Promise<void> {
+  public static async delete(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 
     // try to find user
