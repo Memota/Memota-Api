@@ -86,7 +86,7 @@ export default class NoteController {
       ctx.status = 401
       ctx.body = "No permission"
     } else {
-      // add note to the users notes and save
+      // return the found note
       ctx.status = 200
       ctx.body = note
     }
@@ -98,6 +98,9 @@ export default class NoteController {
     const noteToBePatched: Note = new Note()
     noteToBePatched.title = ctx.request.body.title
     noteToBePatched.text = ctx.request.body.text
+
+    console.log(ctx.request.body)
+    console.log(noteToBePatched.text === undefined)
 
     // validate the note
     const errors: ValidationError[] = await validate(noteToBePatched, {
@@ -127,8 +130,8 @@ export default class NoteController {
         ctx.body = "No permission"
       } else {
         // add note to the users notes and save
-        note.text = noteToBePatched.text || note.text
-        note.title = noteToBePatched.title || note.title
+        note.text = noteToBePatched.text === undefined ? note.text : noteToBePatched.text
+        note.title = noteToBePatched.title === undefined ? note.title : noteToBePatched.title
         const noteToBeReturned = await noteRepository.save(note)
         delete noteToBeReturned.user
         ctx.status = 200
