@@ -52,7 +52,9 @@ export class User {
   @IsOptional()
   role: string
 
-  @Column("simple-array", { default: ["#ffffff"] })
+  @Column("simple-array", {
+    default: "#FFFFFF,#ff9999,#ffcc99,#ffff99,#99ff99,#99ffcc,#99ffff,#99ccff,#9999ff,#cc99ff,#ff99ff",
+  })
   @IsOptional()
   @Length(4, 7, { each: true, groups: ["patch"] })
   @IsHexColor({ each: true, groups: ["patch"] })
