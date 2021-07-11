@@ -13,6 +13,7 @@ export default class NotesController {
     const noteToBeSaved: Note = new Note()
     noteToBeSaved.title = ctx.request.body.title
     noteToBeSaved.text = ctx.request.body.text
+    noteToBeSaved.color = ctx.request.body.color
 
     // validate the note
     const errors: ValidationError[] = await validate(noteToBeSaved, {
@@ -98,6 +99,7 @@ export default class NotesController {
     const noteToBePatched: Note = new Note()
     noteToBePatched.title = ctx.request.body.title
     noteToBePatched.text = ctx.request.body.text
+    noteToBePatched.color = ctx.request.body.color
 
     console.log(ctx.request.body)
     console.log(noteToBePatched.text === undefined)
@@ -132,6 +134,7 @@ export default class NotesController {
         // add note to the users notes and save
         note.text = noteToBePatched.text === undefined ? note.text : noteToBePatched.text
         note.title = noteToBePatched.title === undefined ? note.title : noteToBePatched.title
+        note.color = noteToBePatched.color === undefined ? note.color : noteToBePatched.color
         const noteToBeReturned = await noteRepository.save(note)
         delete noteToBeReturned.user
         ctx.status = 200
