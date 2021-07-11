@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, CreateDateColumn, OneToMany } from "typeorm"
-import { Length, IsEmail, IsOptional, ValidateIf, Matches } from "class-validator"
+import { Length, IsEmail, IsOptional, ValidateIf, Matches, IsHexColor } from "class-validator"
 import { IsUniq } from "@join-com/typeorm-class-validator-is-uniq"
 import { hash, compare } from "bcrypt"
 
@@ -12,11 +12,12 @@ export class User {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @Matches(new RegExp("^[a-zA-Z0-9_]+$"), { groups: ["register"] })
+  @Matches(new RegExp("^[a-zA-Z0-9_]+$"), { groups: ["register", "patch"] })
   @Column({ length: 32, unique: true })
-  @Length(3, 32, { groups: ["register", "login"] })
+  @Length(3, 32, { groups: ["register", "login", "patch"] })
   @IsUniq({ groups: ["register"] })
   @ValidateIf(o => o.email == undefined, { groups: ["login"] })
+  @IsOptional({ groups: ["patch"] })
   username: string
 
   @Column({ length: 64 })
@@ -50,6 +51,12 @@ export class User {
   @Length(2, 20)
   @IsOptional()
   role: string
+
+  @Column("simple-array", { default: ["#ffffff"] })
+  @IsOptional()
+  @Length(4, 7, { each: true, groups: ["patch"] })
+  @IsHexColor({ each: true, groups: ["patch"] })
+  noteColors: string[]
 
   @OneToMany(
     () => Note,
