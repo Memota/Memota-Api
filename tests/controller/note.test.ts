@@ -54,6 +54,7 @@ jest.mock("class-validator", () => {
     Matches: doNothing,
     ValidateIf: doNothing,
     IsOptional: doNothing,
+    IsHexColor: doNothing,
   }
 })
 
@@ -74,6 +75,7 @@ beforeEach(async () => {
   note.text = "Do the dishes"
   note.user = user
   note.id = "9n2cfd5b-e905-4493-83df-cf7b570db4f0"
+  note.color = "#ffffff"
   user.notes = [note]
 
   userInRepository = new User()
