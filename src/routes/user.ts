@@ -7,5 +7,6 @@ import { config } from "../config"
 const router = new Router()
 
 router.get("/profile", jwt({ secret: config.jwtSecret }), user.getProfile)
+router.patch("/profile", jwt({ secret: config.jwtSecret }), user.update)
 
 export { router as user }
