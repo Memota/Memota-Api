@@ -257,7 +257,7 @@ export default class NotesController {
     if (!sharedNote) {
       ctx.status = 404
       ctx.body = "Shared Note not found"
-    } else if (sharedNote.expiresAt.getTime() < new Date().getTime()) {
+    } else if (sharedNote.expiresAt != undefined && sharedNote.expiresAt.getTime() < new Date().getTime()) {
       ctx.status = 404
       ctx.body = "Shared Note expired"
     } else {
