@@ -1,3 +1,4 @@
 export { default as user } from "./user"
 export { default as auth } from "./auth"
 export { default as note } from "./note"
+export { default as settings } from "./settings"

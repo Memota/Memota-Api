@@ -9,6 +9,7 @@ import { EmailVerifyToken } from "../entity/emailVerifyToken"
 import { sendResetMail, sendVerifyMail } from "../email"
 import { config } from "../config"
 import { PasswordResetToken } from "../entity/passwordResetToken"
+import { Settings } from "../entity/settings"
 
 export default class AuthController {
   public static async createUser(ctx: Context): Promise<void> {
@@ -44,6 +45,8 @@ export default class AuthController {
         console.log(err)
         ctx.throw(500, "Could not send email")
       }
+      userToBeSaved.settings = new Settings()
+
       const user = await userRepository.save(userToBeSaved)
       tokenToBeSaved.user = user
       await tokenRepository.save(tokenToBeSaved)

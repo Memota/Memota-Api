@@ -6,6 +6,7 @@ import { hash, compare } from "bcrypt"
 import { EmailVerifyToken } from "./emailVerifyToken"
 import { PasswordResetToken } from "./passwordResetToken"
 import { Note } from "./note"
+import { Settings } from "./settings"
 
 @Entity()
 export class User {
@@ -68,6 +69,17 @@ export class User {
     },
   )
   notes: Note[]
+
+  @JoinColumn()
+  @OneToOne(
+    () => Settings,
+    settings => settings.user,
+    {
+      onDelete: "CASCADE",
+      cascade: true,
+    },
+  )
+  settings: Settings
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
