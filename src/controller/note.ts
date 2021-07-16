@@ -4,6 +4,7 @@ import { getManager, Repository } from "typeorm"
 
 import { User } from "../entity/user"
 import { validate, ValidationError } from "class-validator"
+import { SharedNote } from "../entity/sharedNote"
 
 export default class NotesController {
   public static async create(ctx: Context): Promise<void> {
@@ -76,7 +77,7 @@ export default class NotesController {
         id: ctx.params.id,
       },
       {
-        relations: ["user"],
+        relations: ["user", "sharedNote"],
       },
     )
 
@@ -146,7 +147,7 @@ export default class NotesController {
   public static async delete(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 
-    // try to find user
+    // try to find note
     const note = await noteRepository.findOne(
       {
         id: ctx.params.id,
@@ -164,9 +165,63 @@ export default class NotesController {
       ctx.body = "No permission"
     } else {
       // add note to the users notes and save
-      noteRepository.remove(note)
+      await noteRepository.remove(note)
       ctx.status = 200
       ctx.body = "Note deleted"
+    }
+  }
+  public static async createShared(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+    const sharedNoteRepository: Repository<SharedNote> = getManager().getRepository(SharedNote)
+
+    // try to find note
+    const note: Note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user", "sharedNote"],
+      },
+    )
+
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else if (ctx.state.user.sub !== note.user.id) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      if (note.sharedNote) sharedNoteRepository.remove(note.sharedNote)
+      note.sharedNote = await sharedNoteRepository.save(new SharedNote())
+      const sharedNote = (await noteRepository.save(note)).sharedNote
+      ctx.status = 201
+      ctx.body = sharedNote
+    }
+  }
+  public static async deleteShared(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+    const sharedNoteRepository: Repository<SharedNote> = getManager().getRepository(SharedNote)
+
+    const note: Note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user", "sharedNote"],
+      },
+    )
+
+    if (!note || !note.sharedNote) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else if (ctx.state.user.sub !== note.user.id) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      // delete shared Note
+      await sharedNoteRepository.remove(note.sharedNote)
+      ctx.status = 200
+      ctx.body = "Shared Note deleted"
     }
   }
 }

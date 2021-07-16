@@ -1,6 +1,16 @@
 import { IsHexColor, IsOptional, Length } from "class-validator"
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, UpdateDateColumn } from "typeorm"
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+} from "typeorm"
 import { User } from "./user"
+import { SharedNote } from "./sharedNote"
 
 @Entity()
 export class Note {
@@ -32,6 +42,16 @@ export class Note {
   @IsHexColor()
   @IsOptional({ groups: ["patch"] })
   color: string
+
+  @OneToOne(
+    () => SharedNote,
+    sharedNote => sharedNote.note,
+    {
+      onDelete: "SET NULL",
+    },
+  )
+  @JoinColumn()
+  sharedNote: SharedNote
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
