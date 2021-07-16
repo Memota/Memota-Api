@@ -224,4 +224,25 @@ export default class NotesController {
       ctx.body = "Shared Note deleted"
     }
   }
+
+  public static async showShared(ctx: Context): Promise<void> {
+    const sharedNoteRepository: Repository<SharedNote> = getManager().getRepository(SharedNote)
+
+    const sharedNote: SharedNote = await sharedNoteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["note"],
+      },
+    )
+
+    if (!sharedNote) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else {
+      ctx.status = 200
+      ctx.body = sharedNote
+    }
+  }
 }

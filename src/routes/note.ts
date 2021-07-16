@@ -8,6 +8,7 @@ const router = new Router()
 
 router.post("/", jwt({ secret: config.jwtSecret }), note.create)
 router.get("/", jwt({ secret: config.jwtSecret }), note.index)
+router.get("/shared/:id", jwt({ secret: config.jwtSecret }), note.showShared)
 router.post("/:id/shared", jwt({ secret: config.jwtSecret }), note.createShared)
 router.delete("/:id/shared", jwt({ secret: config.jwtSecret }), note.deleteShared)
 router.patch("/:id", jwt({ secret: config.jwtSecret }), note.update)
