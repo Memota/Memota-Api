@@ -174,28 +174,45 @@ export default class NotesController {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
     const sharedNoteRepository: Repository<SharedNote> = getManager().getRepository(SharedNote)
 
-    // try to find note
-    const note: Note = await noteRepository.findOne(
-      {
-        id: ctx.params.id,
-      },
-      {
-        relations: ["user", "sharedNote"],
-      },
-    )
+    const noteToBeShared = new SharedNote()
 
-    if (!note) {
-      ctx.status = 404
-      ctx.body = "Note not found"
-    } else if (ctx.state.user.sub !== note.user.id) {
-      ctx.status = 401
-      ctx.body = "No permission"
+    const expiresAt = new Date(ctx.request.body.expiresAt)
+    if (!isNaN(expiresAt.getTime())) {
+      noteToBeShared.expiresAt = expiresAt
+    }
+
+    const errors: ValidationError[] = await validate(noteToBeShared, {
+      validationError: { target: false },
+    })
+
+    if (errors.length > 0) {
+      ctx.status = 400
+      ctx.body = errors
+      console.log(errors)
     } else {
-      if (note.sharedNote) sharedNoteRepository.remove(note.sharedNote)
-      note.sharedNote = await sharedNoteRepository.save(new SharedNote())
-      const sharedNote = (await noteRepository.save(note)).sharedNote
-      ctx.status = 201
-      ctx.body = sharedNote
+      // try to find note
+      const note: Note = await noteRepository.findOne(
+        {
+          id: ctx.params.id,
+        },
+        {
+          relations: ["user", "sharedNote"],
+        },
+      )
+
+      if (!note) {
+        ctx.status = 404
+        ctx.body = "Note not found"
+      } else if (ctx.state.user.sub !== note.user.id) {
+        ctx.status = 401
+        ctx.body = "No permission"
+      } else {
+        if (note.sharedNote) sharedNoteRepository.remove(note.sharedNote)
+        note.sharedNote = await sharedNoteRepository.save(noteToBeShared)
+        const sharedNote = (await noteRepository.save(note)).sharedNote
+        ctx.status = 201
+        ctx.body = sharedNote
+      }
     }
   }
   public static async deleteShared(ctx: Context): Promise<void> {
@@ -239,7 +256,10 @@ export default class NotesController {
 
     if (!sharedNote) {
       ctx.status = 404
-      ctx.body = "Note not found"
+      ctx.body = "Shared Note not found"
+    } else if (sharedNote.expiresAt.getTime() < new Date().getTime()) {
+      ctx.status = 404
+      ctx.body = "Shared Note expired"
     } else {
       ctx.status = 200
       ctx.body = sharedNote
