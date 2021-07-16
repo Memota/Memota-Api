@@ -8,9 +8,12 @@ export default class UserController {
   public static async getProfile(ctx: Context): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
     // try to find user
-    const user: User = await userRepository.findOne({
-      id: ctx.state.user.sub,
-    })
+    const user: User = await userRepository.findOne(
+      {
+        id: ctx.state.user.sub,
+      },
+      { relations: ["settings"] },
+    )
     if (!user) {
       ctx.status = 401
       ctx.body = "User not found"
@@ -21,6 +24,7 @@ export default class UserController {
       ctx.body = user
     }
   }
+
   public static async update(ctx: Context): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
 
@@ -29,7 +33,6 @@ export default class UserController {
     userToBePatched.noteColors = ctx.request.body.noteColors as string[]
     console.log(typeof userToBePatched.noteColors)
     console.log(ctx.request.body.noteColors)
-    // console.log(ctx.request.body)
 
     // validate the info
     const errors: ValidationError[] = await validate(userToBePatched, {
