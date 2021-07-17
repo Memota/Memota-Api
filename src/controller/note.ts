@@ -188,7 +188,6 @@ export default class NotesController {
     if (errors.length > 0) {
       ctx.status = 400
       ctx.body = errors
-      console.log(errors)
     } else {
       // try to find note
       const note: Note = await noteRepository.findOne(
@@ -207,7 +206,7 @@ export default class NotesController {
         ctx.status = 401
         ctx.body = "No permission"
       } else {
-        if (note.sharedNote) sharedNoteRepository.remove(note.sharedNote)
+        if (note.sharedNote) await sharedNoteRepository.remove(note.sharedNote)
         note.sharedNote = await sharedNoteRepository.save(noteToBeShared)
         const sharedNote = (await noteRepository.save(note)).sharedNote
         ctx.status = 201

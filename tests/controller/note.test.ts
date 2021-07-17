@@ -6,10 +6,12 @@ import jwt from "jsonwebtoken"
 import { User } from "../../src/entity/user"
 import { Note } from "../../src/entity/note"
 import NoteController from "../../src/controller/note"
+import { SharedNote } from "../../src/entity/sharedNote"
 
 let user: User
 let userInRepository: User
 let note: Note
+let sharedNote: SharedNote
 
 jest.mock("typeorm", () => {
   const doNothing = () => {
@@ -56,6 +58,7 @@ jest.mock("class-validator", () => {
     IsOptional: doNothing,
     IsHexColor: doNothing,
     IsBoolean: doNothing,
+    IsDate: doNothing,
   }
 })
 
@@ -71,12 +74,16 @@ beforeEach(async () => {
   user.password = "test123"
   user.verified = false
 
+  sharedNote = new SharedNote()
+  sharedNote.id = "0d8aac83-953f-4176-a3b5-187674a5c95f"
+
   note = new Note()
   note.title = "My Tasks"
   note.text = "Do the dishes"
   note.user = user
   note.id = "9n2cfd5b-e905-4493-83df-cf7b570db4f0"
   note.color = "#ffffff"
+  note.sharedNote = sharedNote
   user.notes = [note]
 
   userInRepository = new User()
@@ -463,5 +470,163 @@ describe("Note controller", () => {
     expect(noteRepository.remove).toHaveBeenCalledTimes(0)
     expect(context.status).toBe(401)
     expect(context.body).toEqual("No permission")
+  })
+  it("createSharedNote -> Status 200", async () => {
+    const noteRepository = { findOne: jest.fn().mockReturnValue(note), save: jest.fn().mockReturnValue(note) }
+    const sharedNoteRepository = { save: jest.fn(), remove: jest.fn() }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      request: { body: {} },
+      state: { user: { sub: user.id } },
+      params: { id: note.id },
+    } as unknown) as Context
+
+    await NoteController.createShared(context)
+
+    expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
+    expect(noteRepository.save).toHaveBeenCalledTimes(1)
+    expect(sharedNoteRepository.save).toHaveBeenCalledTimes(1)
+    expect(context.status).toBe(201)
+  })
+  it("createSharedNote -> Status 404", async () => {
+    const noteRepository = { findOne: (): undefined => undefined, save: jest.fn().mockReturnValue(note) }
+    const sharedNoteRepository = { save: jest.fn(), remove: jest.fn() }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      request: { body: {} },
+      state: { user: { sub: user.id } },
+      params: { id: note.id },
+    } as unknown) as Context
+
+    await NoteController.createShared(context)
+
+    expect(noteRepository.save).toHaveBeenCalledTimes(0)
+    expect(sharedNoteRepository.save).toHaveBeenCalledTimes(0)
+    expect(context.status).toBe(404)
+  })
+  it("createSharedNote -> Status 401", async () => {
+    const noteRepository = { findOne: jest.fn().mockReturnValue(note), save: jest.fn().mockReturnValue(note) }
+    const sharedNoteRepository = { save: jest.fn(), remove: jest.fn() }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      request: { body: {} },
+      state: { user: { sub: "test" } },
+      params: { id: note.id },
+    } as unknown) as Context
+
+    await NoteController.createShared(context)
+
+    expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
+    expect(noteRepository.save).toHaveBeenCalledTimes(0)
+    expect(sharedNoteRepository.save).toHaveBeenCalledTimes(0)
+    expect(context.status).toBe(401)
+  })
+  it("deleteShared -> Status 200", async () => {
+    const noteRepository = { findOne: jest.fn().mockReturnValue(note) }
+    const sharedNoteRepository = { remove: jest.fn() }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      request: { body: {} },
+      state: { user: { sub: user.id } },
+      params: { id: note.id },
+    } as unknown) as Context
+
+    await NoteController.deleteShared(context)
+
+    expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
+    expect(sharedNoteRepository.remove).toHaveBeenCalledTimes(1)
+    expect(context.status).toBe(200)
+  })
+  it("deleteShared -> Status 404", async () => {
+    const noteRepository = { findOne: (): undefined => undefined }
+    const sharedNoteRepository = { remove: jest.fn() }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      request: { body: {} },
+      state: { user: { sub: user.id } },
+      params: { id: note.id },
+    } as unknown) as Context
+
+    await NoteController.deleteShared(context)
+
+    expect(sharedNoteRepository.remove).toHaveBeenCalledTimes(0)
+    expect(context.status).toBe(404)
+  })
+  it("deleteShared -> Status 401", async () => {
+    const noteRepository = { findOne: jest.fn().mockReturnValue(note) }
+    const sharedNoteRepository = { remove: jest.fn() }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      request: { body: {} },
+      state: { user: { sub: "test" } },
+      params: { id: note.id },
+    } as unknown) as Context
+
+    await NoteController.deleteShared(context)
+
+    expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
+    expect(sharedNoteRepository.remove).toHaveBeenCalledTimes(0)
+    expect(context.status).toBe(401)
+  })
+  it("showShared -> Status 200", async () => {
+    const sharedNoteRepository = { findOne: jest.fn().mockReturnValue(sharedNote) }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      params: { id: sharedNote.id },
+    } as unknown) as Context
+
+    await NoteController.showShared(context)
+
+    expect(sharedNoteRepository.findOne).toHaveBeenCalledTimes(1)
+    expect(context.status).toBe(200)
+  })
+  it("showShared -> Status 404", async () => {
+    const sharedNoteRepository = { findOne: (): undefined => undefined }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => sharedNoteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      body: undefined,
+      params: { id: sharedNote.id },
+    } as unknown) as Context
+
+    await NoteController.showShared(context)
+
+    expect(context.status).toBe(404)
   })
 })
