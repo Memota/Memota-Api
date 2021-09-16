@@ -46,6 +46,7 @@ jest.mock("class-validator", () => {
     IsOptional: doNothing,
     IsHexColor: doNothing,
     IsBoolean: doNothing,
+    IsDate: doNothing,
   }
 })
 
