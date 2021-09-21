@@ -41,13 +41,21 @@ export default class ImageController {
   public static async show(ctx: Context | any) {
     const imageRepository: Repository<Image> = getManager().getRepository(Image)
 
-    const image = await imageRepository.findOne({
-      id: ctx.params.id,
-    })
+    const image = await imageRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user"],
+      },
+    )
 
     if (!image) {
       ctx.status = 404
       ctx.body = "Note not found"
+    } else if (image.user.id !== ctx.state.user.sub) {
+      ctx.status = 401
+      ctx.body = "No permission"
     } else {
       ctx.response.set("content-type", image.mimetype)
       ctx.response.set("content-disposition", "attachment; filename=image." + mime.extension(image.mimetype))
