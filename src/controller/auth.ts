@@ -12,7 +12,7 @@ import { PasswordResetToken } from "../entity/passwordResetToken"
 import { Settings } from "../entity/settings"
 
 export default class AuthController {
-  public static async createUser(ctx: Context): Promise<void> {
+  public static async createUser(ctx: Context | any): Promise<void> {
     // get a user repository to perform operations with user
     const userRepository: Repository<User> = getManager().getRepository(User)
     const tokenRepository: Repository<EmailVerifyToken> = getManager().getRepository(EmailVerifyToken)
@@ -58,7 +58,7 @@ export default class AuthController {
     }
   }
 
-  public static async verify(ctx: Context) {
+  public static async verify(ctx: Context | any) {
     // get email token repository
     const tokenRepository: Repository<EmailVerifyToken> = getManager().getRepository(EmailVerifyToken)
 
@@ -81,7 +81,7 @@ export default class AuthController {
     }
   }
 
-  public static async resend(ctx: Context) {
+  public static async resend(ctx: Context | any) {
     const userRepository: Repository<User> = getManager().getRepository(User)
     const tokenRepository: Repository<EmailVerifyToken> = getManager().getRepository(EmailVerifyToken)
 
@@ -135,7 +135,7 @@ export default class AuthController {
     }
   }
 
-  public static async loginUser(ctx: Context): Promise<void> {
+  public static async loginUser(ctx: Context | any): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
 
     // build up user entity to use for login
@@ -174,7 +174,7 @@ export default class AuthController {
     }
   }
 
-  public static async sendPasswordReset(ctx: Context): Promise<void> {
+  public static async sendPasswordReset(ctx: Context | any): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
     const tokenRepository: Repository<PasswordResetToken> = getManager().getRepository(PasswordResetToken)
 
@@ -229,7 +229,7 @@ export default class AuthController {
     }
   }
 
-  public static async resetPassword(ctx: Context): Promise<void> {
+  public static async resetPassword(ctx: Context | any): Promise<void> {
     const tokenRepository: Repository<PasswordResetToken> = getManager().getRepository(PasswordResetToken)
 
     // create user object with provided password

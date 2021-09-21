@@ -7,6 +7,7 @@ import { EmailVerifyToken } from "./emailVerifyToken"
 import { PasswordResetToken } from "./passwordResetToken"
 import { Note } from "./note"
 import { Settings } from "./settings"
+import { Image } from "./image"
 
 @Entity()
 export class User {
@@ -80,6 +81,15 @@ export class User {
     },
   )
   settings: Settings
+
+  @OneToMany(
+    () => Image,
+    image => image.user,
+    {
+      cascade: true,
+    },
+  )
+  images: Image[]
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
