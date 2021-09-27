@@ -10,6 +10,7 @@ const router = new Router()
 const upload = multer({ limits: { fileSize: 1024 * 1024 } })
 
 router.post("/", compose([upload.single("image"), jwt({ secret: config.jwtSecret })]), image.create)
+router.get("/", jwt({ secret: config.jwtSecret }), image.index)
 router.get("/:id", jwt({ secret: config.jwtSecret }), image.show)
 
 export { router as image }

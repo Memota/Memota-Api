@@ -64,4 +64,24 @@ export default class ImageController {
       ctx.status = 200
     }
   }
+  public static async index(ctx: Context | any) {
+    const userRepository: Repository<User> = getManager().getRepository(User)
+
+    const user: User = await userRepository.findOne(
+      {
+        id: ctx.state.user.sub,
+      },
+      {
+        relations: ["images"],
+      },
+    )
+
+    if (!user) {
+      ctx.status = 404
+      ctx.body = "No permission"
+    } else {
+      ctx.body = user.images.map(i => i.id)
+      ctx.status = 200
+    }
+  }
 }
