@@ -6,6 +6,7 @@ import { User } from "../entity/user"
 import { validate, ValidationError } from "class-validator"
 import { SharedNote } from "../entity/sharedNote"
 import { Image } from "../entity/image"
+import { generateBackupZip, generateNotePdf } from "../backup"
 
 export default class NotesController {
   public static async create(ctx: Context): Promise<void> {

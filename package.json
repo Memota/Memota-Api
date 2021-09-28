@@ -55,6 +55,8 @@
     "email-templates": "^8.0.7",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
+    "jspdf": "^2.4.0",
+    "jszip": "^3.7.1",
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
     "koa-compose": "^4.1.0",
