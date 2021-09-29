@@ -71,7 +71,7 @@ export async function generateBackupZip(user: User): Promise<Buffer> {
   user.notes.forEach(note => {
     const doc = generateNotePdf(note)
     try {
-      zip.file(note.title.toLocaleLowerCase().replace(" ", "-") + ".pdf", doc)
+      zip.file(note.title.toLocaleLowerCase().replace(/ /g, "-") + ".pdf", doc)
     } catch (err) {
       console.log(err)
     }

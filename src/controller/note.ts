@@ -359,9 +359,9 @@ export default class NotesController {
       ctx.body = "No permission"
     } else {
       const pdf = generateNotePdf(note)
-      const fileName = note.title.toLocaleLowerCase().replace(" ", "-") + ".pdf"
+      const fileName = note.title.toLocaleLowerCase().replace(/ /g, "-") + ".pdf"
       ctx.response.set("content-type", "application/pdf")
-      ctx.response.set("content-disposition", "attachment; filename=" + fileName + ".pdf")
+      ctx.response.set("Content-Disposition", "attachment; filename=" + fileName + ".pdf")
       ctx.status = 200
       ctx.body = pdf
     }
