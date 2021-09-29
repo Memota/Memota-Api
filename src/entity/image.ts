@@ -8,10 +8,11 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
-  PrimaryColumn,
+  PrimaryColumn, OneToMany,
 } from "typeorm"
 import { User } from "./user"
 import { SharedNote } from "./sharedNote"
+import { Note } from "./note"
 
 @Entity()
 export class Image {
@@ -27,12 +28,21 @@ export class Image {
 
   @ManyToOne(
     () => User,
-    user => user.notes,
+    user => user.images,
     {
       onDelete: "CASCADE",
     },
   )
   user: User
+
+  @OneToMany(
+    () => Note,
+    note => note.image,
+    {
+      cascade: true,
+    },
+  )
+  notes: Note[]
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date

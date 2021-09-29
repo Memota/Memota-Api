@@ -11,6 +11,7 @@ import {
 } from "typeorm"
 import { User } from "./user"
 import { SharedNote } from "./sharedNote"
+import { Image } from "./image"
 
 @Entity()
 export class Note {
@@ -52,6 +53,15 @@ export class Note {
   )
   @JoinColumn()
   sharedNote: SharedNote
+
+  @ManyToOne(
+    () => Image,
+    image => image.notes,
+    {
+      onDelete: "SET NULL",
+    },
+  )
+  image: Image
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
