@@ -49,6 +49,7 @@ export default class NotesController {
       }
     }
   }
+
   public static async index(ctx: Context): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
     // try to find user
@@ -148,7 +149,6 @@ export default class NotesController {
         const noteToBeReturned = await noteRepository.save(note)
         delete noteToBeReturned.user
 
-        generateNotePdf(note)
         ctx.status = 200
         ctx.body = noteToBeReturned
       }
@@ -181,6 +181,7 @@ export default class NotesController {
       ctx.body = "Note deleted"
     }
   }
+
   public static async createShared(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
     const sharedNoteRepository: Repository<SharedNote> = getManager().getRepository(SharedNote)
@@ -225,6 +226,7 @@ export default class NotesController {
       }
     }
   }
+
   public static async deleteShared(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
     const sharedNoteRepository: Repository<SharedNote> = getManager().getRepository(SharedNote)
@@ -275,6 +277,7 @@ export default class NotesController {
       ctx.body = sharedNote
     }
   }
+
   public static async updateImage(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
     const imageRepository: Repository<Image> = getManager().getRepository(Image)
@@ -308,6 +311,59 @@ export default class NotesController {
       await noteRepository.save(note)
       ctx.status = 201
       ctx.body = "Image added"
+    }
+  }
+
+  public static async downloadBackup(ctx: Context): Promise<void> {
+    const userRepository: Repository<User> = getManager().getRepository(User)
+    // try to find user
+    const user: User = await userRepository.findOne(
+      {
+        id: ctx.state.user.sub,
+      },
+      {
+        relations: ["notes"],
+      },
+    )
+    if (!user) {
+      ctx.status = 401
+      ctx.body = "User not found"
+    } else {
+      const zip = await generateBackupZip(user)
+      const fileName = user.username.toLocaleLowerCase() + "-memota-backup-" + new Date().toLocaleDateString("fr-CA")
+      ctx.response.set("content-type", "application/zip")
+      ctx.response.set("content-disposition", "attachment; filename=" + fileName + ".zip")
+      ctx.status = 200
+      ctx.body = zip
+    }
+  }
+
+  public static async download(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+
+    // try to find user
+    const note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user"],
+      },
+    )
+
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else if (note.user.id !== ctx.state.user.sub) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      const pdf = generateNotePdf(note)
+      const fileName = note.title.toLocaleLowerCase().replace(" ", "-") + ".pdf"
+      ctx.response.set("content-type", "application/pdf")
+      ctx.response.set("content-disposition", "attachment; filename=" + fileName + ".pdf")
+      ctx.status = 200
+      ctx.body = pdf
     }
   }
 

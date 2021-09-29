@@ -21,7 +21,17 @@ const hexToRgb = (h: string) => {
   return { r, g, b }
 }
 
-export function generateNotePdf(note: Note): ArrayBuffer {
+// Source: https://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
+function toBuffer(ab: ArrayBuffer) {
+  const buf = Buffer.alloc(ab.byteLength)
+  const view = new Uint8Array(ab)
+  for (let i = 0; i < buf.length; ++i) {
+    buf[i] = view[i]
+  }
+  return buf
+}
+
+export function generateNotePdf(note: Note): Buffer {
   const doc = new jsPDF("portrait", "px", "a4")
   const defaultFont = doc.getFont()
   const docWidth = doc.internal.pageSize.getWidth()
@@ -52,30 +62,22 @@ export function generateNotePdf(note: Note): ArrayBuffer {
   doc.setFontSize(14)
   doc.text(note.text, 20, 60)
 
-  doc.save("Test.pdf")
-  return doc.output("arraybuffer")
-  //TODO title = pdf name
+  return toBuffer(doc.output("arraybuffer"))
 }
 
-export function generateBackupZip(user: User): ArrayBuffer {
-  //TODO iterate through notes from user, generate pdfs, zip them
+export async function generateBackupZip(user: User): Promise<Buffer> {
   const zip = new JSZip()
 
-  //foreach loop
-  const note = user.notes[0]
-  const doc = generateNotePdf(note)
-  if (typeof doc !== "undefined") {
+  user.notes.forEach(note => {
+    const doc = generateNotePdf(note)
     try {
-      zip.file(note.title + ".pdf", doc)
-    } catch {
-      //error
+      zip.file(note.title.toLocaleLowerCase().replace(" ", "-") + ".pdf", doc)
+    } catch (err) {
+      console.log(err)
     }
-  }
-
-  zip.generateAsync({ type: "arraybuffer" }).then(function(content) {
-    //TODO return zip
-    //saveAs(content, user.name + ".zip")
   })
 
-  return undefined
+  return zip.generateAsync({ type: "nodebuffer" }).then(function(content) {
+    return content
+  })
 }
