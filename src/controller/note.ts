@@ -147,6 +147,8 @@ export default class NotesController {
         note.color = noteToBePatched.color === undefined ? note.color : noteToBePatched.color
         const noteToBeReturned = await noteRepository.save(note)
         delete noteToBeReturned.user
+
+        generateNotePdf(note)
         ctx.status = 200
         ctx.body = noteToBeReturned
       }
