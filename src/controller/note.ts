@@ -56,7 +56,7 @@ export default class NotesController {
         id: ctx.state.user.sub,
       },
       {
-        relations: ["notes"],
+        relations: ["notes", "notes.image"],
       },
     )
     if (!user) {
@@ -65,7 +65,11 @@ export default class NotesController {
     } else {
       // add note to the users notes and save
       ctx.status = 200
-      ctx.body = user.notes
+      ctx.body = user.notes.map(note => {
+        const noteWithoutBuffer = note
+        if (noteWithoutBuffer.image) delete noteWithoutBuffer.image.buffer
+        return noteWithoutBuffer
+      })
     }
   }
 
@@ -78,7 +82,7 @@ export default class NotesController {
         id: ctx.params.id,
       },
       {
-        relations: ["user", "sharedNote"],
+        relations: ["user", "sharedNote", "image"],
       },
     )
 
@@ -90,6 +94,9 @@ export default class NotesController {
       ctx.body = "No permission"
     } else {
       // return the found note
+
+      delete note.image.buffer
+
       ctx.status = 200
       ctx.body = note
     }
