@@ -32,9 +32,9 @@ export default class ImageController {
       ctx.body = "User not found"
     } else {
       imageToBeSaved.user = user
-      await imageRepository.save(imageToBeSaved)
+      const image = await imageRepository.save(imageToBeSaved)
 
-      ctx.body = "Image uploaded"
+      ctx.body = image.id
       ctx.status = 201
     }
   }
@@ -81,6 +81,29 @@ export default class ImageController {
       ctx.body = "No permission"
     } else {
       ctx.body = user.images.map(i => i.id)
+      ctx.status = 200
+    }
+  }
+  public static async delete(ctx: Context | any) {
+    const imageRepository: Repository<Image> = getManager().getRepository(Image)
+
+    const image: Image = await imageRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user"],
+      },
+    )
+    if (!image) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else if (image.user.id !== ctx.state.user.sub) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      await imageRepository.remove(image)
+      ctx.body = "Image deleted"
       ctx.status = 200
     }
   }
