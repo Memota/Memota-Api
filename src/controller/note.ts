@@ -305,4 +305,30 @@ export default class NotesController {
       ctx.body = "Image added"
     }
   }
+
+  public static async deleteImage(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+
+    const note: Note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user", "image"],
+      },
+    )
+
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note or image not found"
+    } else if (ctx.state.user.sub !== note.user.id) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      note.image = null
+      await noteRepository.save(note)
+      ctx.status = 200
+      ctx.body = "Image removed"
+    }
+  }
 }
