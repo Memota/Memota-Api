@@ -75,28 +75,31 @@ export default class FileGenerator {
     doc.setFontSize(8)
     doc.text("Created on " + new Date().toLocaleString(), leftIndent, titleEnd)
 
-    let imageEnd = 60 // default
-    if (withImage) {
-      //TODO Note Image
-      // Note image
-      // get note image from repository
-      //if(note.image)
-      //const image = undefined
+    // Note text
+    doc.setFont(defaultFont.fontName, defaultFont.fontStyle)
+    doc.setFontSize(14)
+    this.wrapText(doc, defaultFont, 12, note.text, 60, docWidth, docHeight, 450, 10, leftIndent, noteColor)
+
+    if (withImage && note.image) {
       /*function loadImage(url) {
         return new Promise((resolve) => {
           img.onload = () => resolve(img);
           img.src = url;
         })
-      }
-      doc.addImage(imgData, "JPEG", leftIndent, titleEnd, 0, 0, undefined, "FAST")
-     */
-      imageEnd = 60
+      }*/
+      doc.addPage()
+      this.fillBackground(doc, docWidth, docHeight, noteColor)
+      doc.addImage(
+        note.image.buffer,
+        note.image.mimetype == "application/png" ? "PNG" : "JPEG",
+        leftIndent,
+        titleEnd,
+        0,
+        0,
+        undefined,
+        "FAST",
+      )
     }
-
-    // Note text
-    doc.setFont(defaultFont.fontName, defaultFont.fontStyle)
-    doc.setFontSize(14)
-    this.wrapText(doc, defaultFont, 12, note.text, imageEnd, docWidth, docHeight, 450, 10, leftIndent, noteColor)
 
     return toBuffer(doc.output("arraybuffer"))
   }

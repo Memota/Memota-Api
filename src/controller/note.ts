@@ -322,7 +322,7 @@ export default class NotesController {
         id: ctx.state.user.sub,
       },
       {
-        relations: ["notes"],
+        relations: ["notes", "notes.image"],
       },
     )
     if (!user) {
@@ -349,7 +349,7 @@ export default class NotesController {
         id: ctx.params.id,
       },
       {
-        relations: ["user"],
+        relations: ["user", "image"],
       },
     )
 
