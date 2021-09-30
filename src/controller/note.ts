@@ -6,7 +6,7 @@ import { User } from "../entity/user"
 import { validate, ValidationError } from "class-validator"
 import { SharedNote } from "../entity/sharedNote"
 import { Image } from "../entity/image"
-import { generateBackupZip, generateNotePdf } from "../backup"
+import FileDownloader from "../backup"
 
 export default class NotesController {
   public static async create(ctx: Context): Promise<void> {
@@ -329,7 +329,7 @@ export default class NotesController {
       ctx.status = 401
       ctx.body = "User not found"
     } else {
-      const zip = await generateBackupZip(user)
+      const zip = await FileDownloader.generateBackupZip(user)
       const fileName = user.username.toLocaleLowerCase() + "-memota-backup-" + new Date().toLocaleDateString("fr-CA")
       ctx.response.set("content-type", "application/zip")
       ctx.response.set("content-disposition", "attachment; filename=" + fileName + ".zip")
@@ -358,7 +358,7 @@ export default class NotesController {
       ctx.status = 401
       ctx.body = "No permission"
     } else {
-      const pdf = generateNotePdf(note)
+      const pdf = FileDownloader.generateNotePdf(note)
       const fileName = note.title.toLocaleLowerCase().replace(/ /g, "-") + ".pdf"
       ctx.response.set("content-type", "application/pdf")
       ctx.response.set("Content-Disposition", "attachment; filename=" + fileName + ".pdf")
