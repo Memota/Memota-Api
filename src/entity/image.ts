@@ -13,6 +13,7 @@ import {
 import { User } from "./user"
 import { SharedNote } from "./sharedNote"
 import { Note } from "./note"
+import { Settings } from "./settings"
 
 @Entity()
 export class Image {
@@ -25,6 +26,15 @@ export class Image {
   @Column({ length: 50 })
   @Length(0, 50)
   mimetype: string
+
+  @OneToOne(
+    () => Settings,
+    settings => settings.image,
+    {
+      onDelete: "CASCADE",
+    },
+  )
+  settings: Settings
 
   @ManyToOne(
     () => User,

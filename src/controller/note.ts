@@ -95,7 +95,9 @@ export default class NotesController {
     } else {
       // return the found note
 
-      delete note.image.buffer
+      if (note.image) {
+        delete note.image.buffer
+      }
 
       ctx.status = 200
       ctx.body = note
