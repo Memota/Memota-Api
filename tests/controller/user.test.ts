@@ -166,7 +166,9 @@ describe("User controller", () => {
     // dark mode true (default)
     user.verified = true
     const userRepository = { findOne: (): User => user, save: jest.fn().mockReturnValue(user) }
+    const imageRepository = {}
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => userRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const context = ({
@@ -185,7 +187,9 @@ describe("User controller", () => {
   it("no permission to access settings -> status 401", async () => {
     //returning different user
     const userRepository = { findOne: (): User => userInRepository, save: jest.fn().mockReturnValue(userInRepository) }
+    const imageRepository = {}
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => userRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const context = ({

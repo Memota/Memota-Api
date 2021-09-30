@@ -10,6 +10,7 @@ import {
   PrimaryColumn,
 } from "typeorm"
 import { User } from "./user"
+import { Image } from "./image"
 
 @Entity()
 export class Settings {
@@ -24,6 +25,17 @@ export class Settings {
     },
   )
   user: User
+
+  @JoinColumn()
+  @OneToOne(
+    () => Image,
+    image => image.settings,
+    {
+      onDelete: "SET NULL",
+      cascade: true,
+    },
+  )
+  image: Image
 
   @Column({ default: false })
   @IsBoolean()

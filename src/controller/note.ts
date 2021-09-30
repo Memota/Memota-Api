@@ -5,6 +5,7 @@ import { getManager, Repository } from "typeorm"
 import { User } from "../entity/user"
 import { validate, ValidationError } from "class-validator"
 import { SharedNote } from "../entity/sharedNote"
+import { Image } from "../entity/image"
 
 export default class NotesController {
   public static async create(ctx: Context): Promise<void> {
@@ -55,7 +56,7 @@ export default class NotesController {
         id: ctx.state.user.sub,
       },
       {
-        relations: ["notes"],
+        relations: ["notes", "notes.image"],
       },
     )
     if (!user) {
@@ -64,7 +65,11 @@ export default class NotesController {
     } else {
       // add note to the users notes and save
       ctx.status = 200
-      ctx.body = user.notes
+      ctx.body = user.notes.map(note => {
+        const noteWithoutBuffer = note
+        if (noteWithoutBuffer.image) delete noteWithoutBuffer.image.buffer
+        return noteWithoutBuffer
+      })
     }
   }
 
@@ -77,7 +82,7 @@ export default class NotesController {
         id: ctx.params.id,
       },
       {
-        relations: ["user", "sharedNote"],
+        relations: ["user", "sharedNote", "image"],
       },
     )
 
@@ -89,6 +94,11 @@ export default class NotesController {
       ctx.body = "No permission"
     } else {
       // return the found note
+
+      if (note.image) {
+        delete note.image.buffer
+      }
+
       ctx.status = 200
       ctx.body = note
     }
@@ -96,14 +106,12 @@ export default class NotesController {
 
   public static async update(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
+    const imageRepository: Repository<Image> = getManager().getRepository(Image)
 
     const noteToBePatched: Note = new Note()
     noteToBePatched.title = ctx.request.body.title
     noteToBePatched.text = ctx.request.body.text
     noteToBePatched.color = ctx.request.body.color
-
-    console.log(ctx.request.body)
-    console.log(noteToBePatched.text === undefined)
 
     // validate the note
     const errors: ValidationError[] = await validate(noteToBePatched, {
@@ -262,6 +270,67 @@ export default class NotesController {
     } else {
       ctx.status = 200
       ctx.body = sharedNote
+    }
+  }
+  public static async updateImage(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+    const imageRepository: Repository<Image> = getManager().getRepository(Image)
+
+    const note: Note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user", "image"],
+      },
+    )
+
+    const image: Image = await imageRepository.findOne(
+      {
+        id: ctx.request.body.image,
+      },
+      {
+        relations: ["user"],
+      },
+    )
+
+    if (!note || !image) {
+      ctx.status = 404
+      ctx.body = "Note or image not found"
+    } else if (ctx.state.user.sub !== note.user.id || ctx.state.user.sub !== image.user.id) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      note.image = image
+      await noteRepository.save(note)
+      ctx.status = 201
+      ctx.body = "Image added"
+    }
+  }
+
+  public static async deleteImage(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+
+    const note: Note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user", "image"],
+      },
+    )
+
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note or image not found"
+    } else if (ctx.state.user.sub !== note.user.id) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      note.image = null
+      await noteRepository.save(note)
+      ctx.status = 200
+      ctx.body = "Image removed"
     }
   }
 }

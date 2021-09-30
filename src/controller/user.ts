@@ -12,7 +12,7 @@ export default class UserController {
       {
         id: ctx.state.user.sub,
       },
-      { relations: ["settings"] },
+      { relations: ["settings", "settings.image"] },
     )
     if (!user) {
       ctx.status = 401
