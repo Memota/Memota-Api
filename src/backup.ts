@@ -158,19 +158,21 @@ export default class FileGenerator {
 
   public static async generateBackupZip(user: User, withImages: boolean, colored: boolean): Promise<Buffer> {
     const zip = new JSZip()
-    let untitledCount = 0
+    const noteTitles = new Map()
     user.notes.forEach(note => {
       const doc = this.generateNotePdf(note, withImages, colored)
       try {
-        let pdfName
-        if (note.title && note.title != "") {
-          pdfName = note.title.toLocaleLowerCase().replace(/ /g, "-")
+        const pdfName = note.title && note.title != "" ? note.title.toLocaleLowerCase().replace(/ /g, "-") : "untitled"
+
+        let suffix = ""
+        if (noteTitles.has(note.title)) {
+          suffix = " (" + noteTitles.get(note.title) + ")"
+          noteTitles.set(note.title, noteTitles.get(note.title) + 1)
         } else {
-          untitledCount == 0 ? (pdfName = "untitled") : (pdfName = "untitled (" + untitledCount + ")")
-          zip.file(pdfName + ".pdf", doc)
-          untitledCount++
+          noteTitles.set(note.title, 1)
         }
-        zip.file(pdfName + ".pdf", doc)
+
+        zip.file(pdfName + suffix + ".pdf", doc)
       } catch (err) {
         console.log(err)
       }
