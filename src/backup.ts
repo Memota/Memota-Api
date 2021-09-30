@@ -31,8 +31,8 @@ function toBuffer(ab: ArrayBuffer) {
   return buf
 }
 
-export default class FileDownloader {
-  public static generateNotePdf(note: Note): Buffer {
+export default class FileGenerator {
+  public static generateNotePdf(note: Note, withImage: boolean, colored: boolean): Buffer {
     const doc = new jsPDF("portrait", "px", "a4")
     const defaultFont = doc.getFont()
     const docWidth = doc.internal.pageSize.getWidth()
@@ -40,9 +40,15 @@ export default class FileDownloader {
     const leftIndent = 20
 
     // Background and text color
-    const noteColor = hexToRgb(note.color)
+    let noteColor
+    // If the note color should be applied to the document pages
+    if (colored) {
+      noteColor = hexToRgb(note.color)
+      darkColorMatcher.test(note.color) ? doc.setTextColor(255, 255, 255) : doc.setTextColor(0, 0, 0)
+    } else {
+      noteColor = hexToRgb("#ffffff")
+    }
     this.fillBackground(doc, docWidth, docHeight, noteColor)
-    darkColorMatcher.test(note.color) ? doc.setTextColor(255, 255, 255) : doc.setTextColor(0, 0, 0)
 
     // Memota Logo
     const logo = fs.readFileSync("assets/logo.png", null).buffer
@@ -69,18 +75,23 @@ export default class FileDownloader {
     doc.setFontSize(8)
     doc.text("Created on " + new Date().toLocaleString(), leftIndent, titleEnd)
 
-    //TODO Note Image
-    // Note image
-    //const image = undefined
-    /*function loadImage(url) {
-      return new Promise((resolve) => {
-        img.onload = () => resolve(img);
-        img.src = url;
-      })
+    let imageEnd = 60 // default
+    if (withImage) {
+      //TODO Note Image
+      // Note image
+      // get note image from repository
+      //if(note.image)
+      //const image = undefined
+      /*function loadImage(url) {
+        return new Promise((resolve) => {
+          img.onload = () => resolve(img);
+          img.src = url;
+        })
+      }
+      doc.addImage(imgData, "JPEG", leftIndent, titleEnd, 0, 0, undefined, "FAST")
+     */
+      imageEnd = 60
     }
-    doc.addImage(imgData, "JPEG", leftIndent, titleEnd, 0, 0, undefined, "FAST")
-   */
-    const imageEnd = 60
 
     // Note text
     doc.setFont(defaultFont.fontName, defaultFont.fontStyle)
@@ -90,6 +101,7 @@ export default class FileDownloader {
     return toBuffer(doc.output("arraybuffer"))
   }
 
+  // call function before drawing text
   static fillBackground(
     doc: jsPDF,
     width: number,
@@ -101,6 +113,7 @@ export default class FileDownloader {
     },
   ) {
     doc.setFillColor(pageColor.r, pageColor.g, pageColor.b)
+    // draw full page rectangle to fill it
     doc.rect(0, 0, width, height, "F")
   }
 
@@ -121,15 +134,17 @@ export default class FileDownloader {
       b: number
     },
   ): number {
+    // split text string into array of sentences according to wrap width
     const splitText = doc.splitTextToSize(text, wrapWidth)
     doc.setFont(font.fontName, font.fontStyle)
     doc.setFontSize(fontSize)
     let y = textStart // y is for spacing between lines
     let pageNumber = 1
     for (let i = 0; i < splitText.length; i++) {
+      // when end of the page is reached
       if (y > docHeight - lineSpacing) {
-        if (pageNumber == 1) doc.text(pageNumber.toString(), docWidth - 15, docHeight - lineSpacing)
         y = 20 // top indentation on new page
+        if (pageNumber == 1) doc.text(pageNumber.toString(), docWidth - 15, docHeight - lineSpacing)
         doc.addPage()
         this.fillBackground(doc, docWidth, docHeight, pageColor)
         pageNumber++
@@ -141,13 +156,21 @@ export default class FileDownloader {
     return y
   }
 
-  public static async generateBackupZip(user: User): Promise<Buffer> {
+  public static async generateBackupZip(user: User, withImages: boolean, colored: boolean): Promise<Buffer> {
     const zip = new JSZip()
-
+    let untitledCount = 0
     user.notes.forEach(note => {
-      const doc = this.generateNotePdf(note)
+      const doc = this.generateNotePdf(note, withImages, colored)
       try {
-        zip.file(note.title.toLocaleLowerCase().replace(/ /g, "-") + ".pdf", doc)
+        let pdfName
+        if (note.title && note.title != "") {
+          pdfName = note.title.toLocaleLowerCase().replace(/ /g, "-")
+        } else {
+          untitledCount == 0 ? (pdfName = "untitled") : (pdfName = "untitled (" + untitledCount + ")")
+          zip.file(pdfName + ".pdf", doc)
+          untitledCount++
+        }
+        zip.file(pdfName + ".pdf", doc)
       } catch (err) {
         console.log(err)
       }
