@@ -34,7 +34,10 @@ createConnection({
     // Adds CORS header
     app.use(async (ctx, next) => {
       ctx.set("Access-Control-Allow-Origin", "*")
-      ctx.set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+      ctx.set(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization, Content-Disposition",
+      )
       ctx.set("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE, OPTIONS")
       await next()
     })
