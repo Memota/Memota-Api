@@ -83,6 +83,6 @@ it("generateNotePdf -> not colored", () => {
 it("generateBackupZip -> success", async () => {
   const zip = await FileGenerator.generateBackupZip(user, true, true)
   expect(zip).not.toBeNull()
-  // Zip should contain pdf (so longer buffer length overall)
-  expect(zip.toString().length).toBeGreaterThan(samplePDF.toString().length)
+  // Zip should contains the pdf so it should be > 0.5mb [~500000 chars]
+  expect(zip.toString().length).toBeGreaterThan(500000)
 })
