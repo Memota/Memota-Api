@@ -27,7 +27,10 @@ export default class SettingsController {
       ctx.body = errors
     } else {
       // try to find user
-      const user: User = await userRepository.findOne({ id: ctx.state.user.sub }, { relations: ["settings", "settings.image"] })
+      const user: User = await userRepository.findOne(
+        { id: ctx.state.user.sub },
+        { relations: ["settings", "settings.image"] },
+      )
 
       let image: Image
       if (ctx.request.body.image) {

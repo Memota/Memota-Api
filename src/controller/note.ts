@@ -7,11 +7,13 @@ import { validate, ValidationError } from "class-validator"
 import { SharedNote } from "../entity/sharedNote"
 import { Image } from "../entity/image"
 import FileGenerator from "../utils/pdf"
+import { NoteOptions } from "../entity/noteOptions"
 
 export default class NotesController {
   public static async create(ctx: Context): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
+    const noteOptionsRepository: Repository<NoteOptions> = getManager().getRepository(NoteOptions)
 
     const noteToBeSaved: Note = new Note()
     noteToBeSaved.title = ctx.request.body.title
@@ -19,34 +21,56 @@ export default class NotesController {
     noteToBeSaved.color = ctx.request.body.color
 
     // validate the note
-    const errors: ValidationError[] = await validate(noteToBeSaved, {
-      validationError: { target: false },
-    })
-    if (errors.length > 0) {
-      // return BAD REQUEST status code and errors array
-      ctx.status = 400
-      ctx.body = errors
-    } else {
-      // try to find user
-      const user: User = await userRepository.findOne(
-        {
-          id: ctx.state.user.sub,
-        },
-        {
-          relations: ["notes"],
-        },
-      )
-      if (!user) {
-        ctx.status = 401
-        ctx.body = "User not found"
-      } else {
-        // add note to the users notes and save
-        noteToBeSaved.user = user
-        const note = await noteRepository.save(noteToBeSaved)
-        delete note.user
-        ctx.status = 201
-        ctx.body = note
+    {
+      const errors: ValidationError[] = await validate(noteToBeSaved, {
+        validationError: { target: false },
+      })
+      if (errors.length > 0) {
+        // return BAD REQUEST status code and errors array
+        ctx.status = 400
+        ctx.body = errors
+        return
       }
+    }
+
+    const noteOptions: NoteOptions = new NoteOptions()
+    noteOptions.encrypted = ctx.request.body.options?.encrypted
+    noteOptions.hidden = ctx.request.body.options?.hidden
+    noteOptions.pinned = ctx.request.body.options?.pinned
+
+    // validate the notes options
+    {
+      const errors: ValidationError[] = await validate(noteOptions, {
+        validationError: { target: false },
+      })
+      if (errors.length > 0) {
+        // return BAD REQUEST status code and errors array
+        ctx.status = 400
+        ctx.body = errors
+      }
+    }
+
+    // try to find user
+    const user: User = await userRepository.findOne(
+      {
+        id: ctx.state.user.sub,
+      },
+      {
+        relations: ["notes", "notes.options"],
+      },
+    )
+    if (!user) {
+      ctx.status = 401
+      ctx.body = "User not found"
+    } else {
+      // add note to the users notes and save
+      noteToBeSaved.user = user
+      noteToBeSaved.options = noteOptions
+      await noteOptionsRepository.save(noteOptions)
+      const note = await noteRepository.save(noteToBeSaved)
+      delete note.user
+      ctx.status = 201
+      ctx.body = note
     }
   }
 
@@ -58,7 +82,7 @@ export default class NotesController {
         id: ctx.state.user.sub,
       },
       {
-        relations: ["notes", "notes.image"],
+        relations: ["notes", "notes.image", "notes.options"],
       },
     )
     if (!user) {
@@ -84,7 +108,7 @@ export default class NotesController {
         id: ctx.params.id,
       },
       {
-        relations: ["user", "sharedNote", "image"],
+        relations: ["user", "sharedNote", "image", "options"],
       },
     )
 
@@ -109,6 +133,7 @@ export default class NotesController {
   public static async update(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
     const imageRepository: Repository<Image> = getManager().getRepository(Image)
+    const noteOptionsRepository: Repository<NoteOptions> = getManager().getRepository(NoteOptions)
 
     const noteToBePatched: Note = new Note()
     noteToBePatched.title = ctx.request.body.title
@@ -116,42 +141,71 @@ export default class NotesController {
     noteToBePatched.color = ctx.request.body.color
 
     // validate the note
-    const errors: ValidationError[] = await validate(noteToBePatched, {
-      groups: ["patch"],
-      validationError: { target: false },
-    })
+    {
+      const errors: ValidationError[] = await validate(noteToBePatched, {
+        groups: ["patch"],
+        validationError: { target: false },
+      })
 
-    if (errors.length > 0) {
-      // return BAD REQUEST status code and errors array
-      ctx.status = 400
-      ctx.body = errors
-    } else {
-      // try to find user
-      const note = await noteRepository.findOne(
-        {
-          id: ctx.params.id,
-        },
-        {
-          relations: ["user"],
-        },
-      )
-      if (!note) {
-        ctx.status = 404
-        ctx.body = "Note not found"
-      } else if (note.user.id !== ctx.state.user.sub) {
-        ctx.status = 401
-        ctx.body = "No permission"
-      } else {
-        // add note to the users notes and save
-        note.text = noteToBePatched.text === undefined ? note.text : noteToBePatched.text
-        note.title = noteToBePatched.title === undefined ? note.title : noteToBePatched.title
-        note.color = noteToBePatched.color === undefined ? note.color : noteToBePatched.color
-        const noteToBeReturned = await noteRepository.save(note)
-        delete noteToBeReturned.user
-
-        ctx.status = 200
-        ctx.body = noteToBeReturned
+      if (errors.length > 0) {
+        // return BAD REQUEST status code and errors array
+        ctx.status = 400
+        ctx.body = errors
+        return
       }
+    }
+
+    const noteOptions: NoteOptions = new NoteOptions()
+    noteOptions.encrypted = ctx.request.body.options?.encrypted
+    noteOptions.hidden = ctx.request.body.options?.hidden
+    noteOptions.pinned = ctx.request.body.options?.pinned
+
+    // validate the notes options
+    {
+      const errors: ValidationError[] = await validate(noteOptions, {
+        validationError: { target: false },
+      })
+      if (errors.length > 0) {
+        // return BAD REQUEST status code and errors array
+        ctx.status = 400
+        ctx.body = errors
+      }
+    }
+
+    // try to find user
+    const note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["user", "options"],
+      },
+    )
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else if (note.user.id !== ctx.state.user.sub) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      // add note to the users notes and save
+      note.text = noteToBePatched.text === undefined ? note.text : noteToBePatched.text
+      note.title = noteToBePatched.title === undefined ? note.title : noteToBePatched.title
+      note.color = noteToBePatched.color === undefined ? note.color : noteToBePatched.color
+
+      // update note options
+      note.options.encrypted = noteOptions.encrypted
+      note.options.hidden = noteOptions.hidden
+      note.options.pinned = noteOptions.pinned
+
+      const noteToBeReturned = await noteRepository.save(note)
+      noteOptions.id = noteToBeReturned.options.id
+
+      await noteOptionsRepository.save(noteOptions)
+
+      delete noteToBeReturned.user
+      ctx.status = 200
+      ctx.body = noteToBeReturned
     }
   }
 
