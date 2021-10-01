@@ -6,7 +6,7 @@ import { User } from "../entity/user"
 import { validate, ValidationError } from "class-validator"
 import { SharedNote } from "../entity/sharedNote"
 import { Image } from "../entity/image"
-import FileGenerator from "../backup"
+import FileGenerator from "../utils/pdf"
 
 export default class NotesController {
   public static async create(ctx: Context): Promise<void> {
@@ -314,29 +314,29 @@ export default class NotesController {
     }
   }
 
-  public static async downloadBackup(ctx: Context): Promise<void> {
-    const userRepository: Repository<User> = getManager().getRepository(User)
-    // try to find user
-    const user: User = await userRepository.findOne(
+  public static async deleteImage(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+
+    const note: Note = await noteRepository.findOne(
       {
-        id: ctx.state.user.sub,
+        id: ctx.params.id,
       },
       {
-        relations: ["notes", "notes.image"],
+        relations: ["user", "image"],
       },
     )
-    if (!user) {
+
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note or image not found"
+    } else if (ctx.state.user.sub !== note.user.id) {
       ctx.status = 401
-      ctx.body = "User not found"
+      ctx.body = "No permission"
     } else {
-      const images = ctx.request.query.images == "true"
-      const colors = ctx.request.query.colors == "true"
-      const zip = await FileGenerator.generateBackupZip(user, images, colors)
-      const fileName = user.username.toLocaleLowerCase() + "-memota-backup-" + new Date().toLocaleDateString("fr-CA")
-      ctx.response.set("content-type", "application/zip")
-      ctx.response.set("content-disposition", "attachment; filename=" + fileName + ".zip")
+      note.image = null
+      await noteRepository.save(note)
       ctx.status = 200
-      ctx.body = zip
+      ctx.body = "Image removed"
     }
   }
 
@@ -369,29 +369,29 @@ export default class NotesController {
     }
   }
 
-  public static async deleteImage(ctx: Context): Promise<void> {
-    const noteRepository: Repository<Note> = getManager().getRepository(Note)
-
-    const note: Note = await noteRepository.findOne(
+  public static async downloadBackup(ctx: Context): Promise<void> {
+    const userRepository: Repository<User> = getManager().getRepository(User)
+    // try to find user
+    const user: User = await userRepository.findOne(
       {
-        id: ctx.params.id,
+        id: ctx.state.user.sub,
       },
       {
-        relations: ["user", "image"],
+        relations: ["notes", "notes.image"],
       },
     )
-
-    if (!note) {
-      ctx.status = 404
-      ctx.body = "Note or image not found"
-    } else if (ctx.state.user.sub !== note.user.id) {
+    if (!user) {
       ctx.status = 401
-      ctx.body = "No permission"
+      ctx.body = "User not found"
     } else {
-      note.image = null
-      await noteRepository.save(note)
+      const images = ctx.request.query.images == "true"
+      const colors = ctx.request.query.colors == "true"
+      const zip = await FileGenerator.generateBackupZip(user, images, colors)
+      const fileName = user.username.toLocaleLowerCase() + "-memota-backup-" + new Date().toLocaleDateString("fr-CA")
+      ctx.response.set("content-type", "application/zip")
+      ctx.response.set("content-disposition", "attachment; filename=" + fileName + ".zip")
       ctx.status = 200
-      ctx.body = "Image removed"
+      ctx.body = zip
     }
   }
 }

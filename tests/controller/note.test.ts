@@ -7,11 +7,17 @@ import { User } from "../../src/entity/user"
 import { Note } from "../../src/entity/note"
 import NoteController from "../../src/controller/note"
 import { SharedNote } from "../../src/entity/sharedNote"
+import { Image } from "../../src/entity/image"
+import fs from "fs"
+import { toBuffer } from "../../src/utils/pdf"
 
 let user: User
 let userInRepository: User
 let note: Note
+let image: Image
+let testImageArrayBuffer: ArrayBuffer
 let sharedNote: SharedNote
+let samplePDF: Buffer
 
 jest.mock("typeorm", () => {
   const doNothing = () => {
@@ -77,6 +83,12 @@ beforeEach(async () => {
   sharedNote = new SharedNote()
   sharedNote.id = "0d8aac83-953f-4176-a3b5-187674a5c95f"
 
+  image = new Image()
+  image.mimetype = "application/jpeg"
+  image.id = "3e8a1e8c-e27c-41f5-b434-8ebea6c33806"
+  testImageArrayBuffer = fs.readFileSync("assets/logo.png", null).buffer
+  image.buffer = toBuffer(testImageArrayBuffer)
+
   note = new Note()
   note.title = "My Tasks"
   note.text = "Do the dishes"
@@ -84,6 +96,7 @@ beforeEach(async () => {
   note.id = "9n2cfd5b-e905-4493-83df-cf7b570db4f0"
   note.color = "#ffffff"
   note.sharedNote = sharedNote
+  note.image = image
   user.notes = [note]
 
   userInRepository = new User()
@@ -92,6 +105,8 @@ beforeEach(async () => {
   userInRepository.password = user.password
   userInRepository.verified = true
   await userInRepository.hashPassword()
+
+  samplePDF = toBuffer(fs.readFileSync("assets/samplePDF.pdf", null).buffer)
 })
 
 describe("Note controller", () => {
@@ -640,5 +655,98 @@ describe("Note controller", () => {
     await NoteController.showShared(context)
 
     expect(context.status).toBe(404)
+  })
+  it("download -> Status 200", async () => {
+    const noteRepository = { findOne: jest.fn().mockReturnValue(note) }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      request: { body: {} },
+      response: { set: jest.fn() },
+      state: { user: { sub: user.id } },
+      params: { id: user.id },
+    } as unknown) as Context
+
+    await NoteController.download(context)
+
+    expect(context.status).toBe(200)
+    // body contains pdf
+    expect(context.body.toString().substring(0, 200)).toEqual(samplePDF.toString().substring(0, 200))
+    expect(context.body.toString().length).toEqual(samplePDF.toString().length)
+  })
+  it("download -> Status 404", async () => {
+    const noteRepository = { findOne: jest.fn().mockReturnValue(undefined) }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      request: { body: {} },
+      response: { set: jest.fn() },
+      state: { user: { sub: user.id } },
+      params: { id: user.id },
+    } as unknown) as Context
+
+    await NoteController.download(context)
+    expect(context.status).toBe(404)
+    expect(context.body).toEqual("Note not found")
+  })
+  it("download -> Status 401", async () => {
+    const noteRepository = { findOne: jest.fn().mockReturnValue(note) }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      request: { body: {} },
+      response: { set: jest.fn() },
+      state: { user: { sub: "wrong" } },
+      params: { id: user.id },
+    } as unknown) as Context
+
+    await NoteController.download(context)
+    expect(context.status).toBe(401)
+    expect(context.body).toEqual("No permission")
+  })
+  it("downloadBackup -> Status 401", async () => {
+    const userRepository = { findOne: jest.fn().mockReturnValue(undefined) }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => userRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      request: { body: {} },
+      response: { set: jest.fn() },
+      state: { user: { sub: "wrong" } },
+      params: { id: "wrong" },
+    } as unknown) as Context
+
+    await NoteController.downloadBackup(context)
+
+    expect(context.status).toBe(401)
+  })
+  it("downloadBackup -> Status 200", async () => {
+    user.notes = [note]
+    const userRepository = { findOne: jest.fn().mockReturnValue(user) }
+    const noteRepository = { findOne: jest.fn().mockReturnValue(note) }
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => userRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(validate as jest.Mock).mockReturnValue([])
+
+    const context = ({
+      status: undefined,
+      request: { body: {}, query: { images: true, colors: true } },
+      response: { set: jest.fn() },
+      state: { user: { sub: user.id } },
+      params: { id: user.id },
+    } as unknown) as Context
+
+    await NoteController.downloadBackup(context)
+
+    expect(context.status).toBe(200)
+    // body contains zip (> 0.5mb [~500000 chars])
+    expect(context.body.toString().length).toBeGreaterThan(500000)
   })
 })

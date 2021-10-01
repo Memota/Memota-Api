@@ -1,13 +1,13 @@
-import { User } from "./entity/user"
-import { Note } from "./entity/note"
+import { User } from "../entity/user"
+import { Note } from "../entity/note"
 import { Font, jsPDF } from "jspdf"
-import JSZip = require("../node_modules/jszip")
+import JSZip = require("jszip")
 import * as fs from "fs"
 
 const darkColorMatcher = new RegExp("^#([0-7][0-9a-fA-F]){3}")
 
 // Inspired by https://www.codegrepper.com/code-examples/javascript/hex+to+rgb+typescript
-const hexToRgb = (h: string) => {
+export const hexToRgb = (h: string) => {
   let [r, g, b] = [0, 0, 0]
   if (h.length == 4) {
     r = parseInt("0x" + h[1] + h[1])
@@ -22,7 +22,7 @@ const hexToRgb = (h: string) => {
 }
 
 // Source: https://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
-function toBuffer(ab: ArrayBuffer) {
+export function toBuffer(ab: ArrayBuffer) {
   const buf = Buffer.alloc(ab.byteLength)
   const view = new Uint8Array(ab)
   for (let i = 0; i < buf.length; ++i) {
@@ -47,6 +47,7 @@ export default class FileGenerator {
       darkColorMatcher.test(note.color) ? doc.setTextColor(255, 255, 255) : doc.setTextColor(0, 0, 0)
     } else {
       noteColor = hexToRgb("#ffffff")
+      doc.setTextColor(0, 0, 0)
     }
     this.fillBackground(doc, docWidth, docHeight, noteColor)
 
