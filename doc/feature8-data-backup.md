@@ -1,6 +1,6 @@
 # Data Backup
 ___
-#### Diese Pull Request fügt das hochladen von Bildern hinzu
+#### Diese Pull Request fügt die Möglichkeit zum Herunterladen von Notizen und einem Backup hinzu
 
 Funktionen:
 * PDF/ZIP Generierung von Notizen im Back-End
