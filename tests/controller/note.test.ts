@@ -1,14 +1,13 @@
-import { Context, DefaultState, ParameterizedContext } from "koa"
-import { ValidationError, validate } from "class-validator"
-import { getManager, Not, OneToOne, SimpleConsoleLogger } from "typeorm"
-import jwt from "jsonwebtoken"
+import { Context } from "koa"
+import { validate } from "class-validator"
+import { getManager } from "typeorm"
+import fs from "fs"
 
 import { User } from "../../src/entity/user"
 import { Note } from "../../src/entity/note"
 import NoteController from "../../src/controller/note"
 import { SharedNote } from "../../src/entity/sharedNote"
 import { Image } from "../../src/entity/image"
-import fs from "fs"
 import { toBuffer } from "../../src/utils/pdf"
 import { NoteOptions } from "../../src/entity/noteOptions"
 

@@ -1,13 +1,12 @@
-import { Context, DefaultState, ParameterizedContext } from "koa"
-import { ValidationError, validate } from "class-validator"
-import { getManager, OneToOne } from "typeorm"
+import { Context } from "koa"
+import { validate } from "class-validator"
+import { getManager } from "typeorm"
 import jwt from "jsonwebtoken"
 
 import AuthController from "../../src/controller/auth"
 import { User } from "../../src/entity/user"
 import { EmailVerifyToken } from "../../src/entity/emailVerifyToken"
 import { PasswordResetToken } from "../../src/entity/passwordResetToken"
-import { config } from "../../src/config"
 
 let user: User
 let userInRepository: User

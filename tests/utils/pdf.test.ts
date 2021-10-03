@@ -1,8 +1,9 @@
+import fs from "fs"
+
 import FileGenerator, { hexToRgb, toBuffer } from "../../src/utils/pdf"
 import { User } from "../../src/entity/user"
 import { Image } from "../../src/entity/image"
 import { Note } from "../../src/entity/note"
-import fs from "fs"
 import { NoteOptions } from "../../src/entity/noteOptions"
 
 let user: User

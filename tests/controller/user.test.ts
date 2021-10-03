@@ -1,6 +1,6 @@
-import { Context, DefaultState, ParameterizedContext } from "koa"
-import { ValidationError, validate } from "class-validator"
-import { getManager, OneToOne } from "typeorm"
+import { Context } from "koa"
+import { validate } from "class-validator"
+import { getManager } from "typeorm"
 
 import UserController from "../../src/controller/user"
 import { User } from "../../src/entity/user"

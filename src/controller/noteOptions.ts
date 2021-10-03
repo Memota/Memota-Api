@@ -1,8 +1,8 @@
 import { Context } from "koa"
-import { Note } from "../entity/note"
 import { getManager, Repository } from "typeorm"
-
 import { validate, ValidationError } from "class-validator"
+
+import { Note } from "../entity/note"
 import { NoteOptions } from "../entity/noteOptions"
 
 export default class NoteOptionsController {

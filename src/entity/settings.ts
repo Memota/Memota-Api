@@ -1,4 +1,4 @@
-import { IsBoolean, IsHexColor, IsOptional, Length } from "class-validator"
+import { IsBoolean, IsOptional } from "class-validator"
 import {
   Entity,
   Column,
@@ -7,8 +7,8 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
-  PrimaryColumn,
 } from "typeorm"
+
 import { User } from "./user"
 import { Image } from "./image"
 

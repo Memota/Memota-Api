@@ -1,12 +1,8 @@
 import mime from "mime-types"
-
 import { Context } from "koa"
-import { Note } from "../entity/note"
 import { getManager, Repository } from "typeorm"
 
 import { Image } from "../entity/image"
-import { validate, ValidationError } from "class-validator"
-import { SharedNote } from "../entity/sharedNote"
 import { User } from "../entity/user"
 
 export default class ImageController {

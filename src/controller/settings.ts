@@ -1,10 +1,9 @@
 import { Context } from "koa"
 import { getManager, Repository } from "typeorm"
-
 import { validate, ValidationError } from "class-validator"
+
 import { Settings } from "../entity/settings"
 import { User } from "../entity/user"
-import { settings } from "./index"
 import { Image } from "../entity/image"
 
 export default class SettingsController {

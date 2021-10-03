@@ -1,8 +1,9 @@
+import { Font, jsPDF } from "jspdf"
+import JSZip from "jszip"
+import * as fs from "fs"
+
 import { User } from "../entity/user"
 import { Note } from "../entity/note"
-import { Font, jsPDF } from "jspdf"
-import JSZip = require("jszip")
-import * as fs from "fs"
 
 const darkColorMatcher = new RegExp("^#([0-7][0-9a-fA-F]){3}")
 
