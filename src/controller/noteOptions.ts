@@ -48,4 +48,29 @@ export default class NoteOptionsController {
       }
     }
   }
+
+  public static async show(ctx: Context): Promise<void> {
+    const noteRepository: Repository<Note> = getManager().getRepository(Note)
+
+    // try to find note
+    const note = await noteRepository.findOne(
+      {
+        id: ctx.params.id,
+      },
+      {
+        relations: ["options"],
+      },
+    )
+    if (!note) {
+      ctx.status = 404
+      ctx.body = "Note not found"
+    } else if (note.user.id !== ctx.state.user.sub) {
+      ctx.status = 401
+      ctx.body = "No permission"
+    } else {
+      // Return the notes options
+      ctx.status = 200
+      ctx.body = note.options
+    }
+  }
 }
