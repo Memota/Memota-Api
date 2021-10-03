@@ -33,6 +33,7 @@ export default class NotesController {
       }
     }
 
+    // Also create the notes options for later use
     const noteOptions: NoteOptions = new NoteOptions()
     noteOptions.encrypted = ctx.request.body.options?.encrypted
     noteOptions.hidden = ctx.request.body.options?.hidden
@@ -68,6 +69,8 @@ export default class NotesController {
       noteToBeSaved.options = noteOptions
       await noteOptionsRepository.save(noteOptions)
       const note = await noteRepository.save(noteToBeSaved)
+
+      // OK
       delete note.user
       ctx.status = 201
       ctx.body = note
@@ -155,6 +158,7 @@ export default class NotesController {
       }
     }
 
+    // To allow the frontend to patch entire notes in one go, fetch the options alwell
     const noteOptions: NoteOptions = new NoteOptions()
     noteOptions.encrypted = ctx.request.body.options?.encrypted
     noteOptions.hidden = ctx.request.body.options?.hidden
@@ -198,11 +202,12 @@ export default class NotesController {
       note.options.hidden = noteOptions.hidden
       note.options.pinned = noteOptions.pinned
 
+      // Give it to the backend!
       const noteToBeReturned = await noteRepository.save(note)
       noteOptions.id = noteToBeReturned.options.id
-
       await noteOptionsRepository.save(noteOptions)
 
+      // OK
       delete noteToBeReturned.user
       ctx.status = 200
       ctx.body = noteToBeReturned

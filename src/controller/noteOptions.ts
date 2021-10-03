@@ -9,12 +9,13 @@ export default class NoteOptionsController {
   public static async update(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 
+    // Fetch note options from body
     const newOptions: NoteOptions = new NoteOptions()
     newOptions.encrypted = ctx.request.body.encrypted
     newOptions.pinned = ctx.request.body.encrypted
     newOptions.hidden = ctx.request.body.encrypted
 
-    // validate the note
+    // Validate the note options
     const errors: ValidationError[] = await validate(newOptions, {
       validationError: { target: false },
     })
@@ -43,6 +44,8 @@ export default class NoteOptionsController {
         // Update note options to database
         note.options = newOptions
         const noteFromDatabase = await noteRepository.save(note)
+
+        // OK
         ctx.status = 200
         ctx.body = noteFromDatabase.options
       }
@@ -52,7 +55,7 @@ export default class NoteOptionsController {
   public static async show(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
 
-    // try to find note
+    // try to find the note
     const note = await noteRepository.findOne(
       {
         id: ctx.params.id,
@@ -61,6 +64,7 @@ export default class NoteOptionsController {
         relations: ["options"],
       },
     )
+
     if (!note) {
       ctx.status = 404
       ctx.body = "Note not found"
