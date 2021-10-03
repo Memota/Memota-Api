@@ -8,7 +8,13 @@ import { Note } from "../entity/note"
 const darkColorMatcher = new RegExp("^#([0-7][0-9a-fA-F]){3}")
 
 // Inspired by https://www.codegrepper.com/code-examples/javascript/hex+to+rgb+typescript
-export const hexToRgb = (h: string) => {
+export const hexToRgb = (
+  h: string,
+): {
+  r: number
+  g: number
+  b: number
+} => {
   let [r, g, b] = [0, 0, 0]
   if (h.length == 4) {
     r = parseInt("0x" + h[1] + h[1])
@@ -23,7 +29,7 @@ export const hexToRgb = (h: string) => {
 }
 
 // Source: https://stackoverflow.com/questions/8609289/convert-a-binary-nodejs-buffer-to-javascript-arraybuffer
-export function toBuffer(ab: ArrayBuffer) {
+export function toBuffer(ab: ArrayBuffer): Buffer {
   const buf = Buffer.alloc(ab.byteLength)
   const view = new Uint8Array(ab)
   for (let i = 0; i < buf.length; ++i) {
@@ -116,7 +122,7 @@ export default class FileGenerator {
       g: number
       b: number
     },
-  ) {
+  ): void {
     doc.setFillColor(pageColor.r, pageColor.g, pageColor.b)
     // draw full page rectangle to fill it
     doc.rect(0, 0, width, height, "F")

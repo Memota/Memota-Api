@@ -6,7 +6,7 @@ import { Image } from "../entity/image"
 import { User } from "../entity/user"
 
 export default class ImageController {
-  public static async create(ctx: Context) {
+  public static async create(ctx: Context): Promise<void> {
     const imageRepository: Repository<Image> = getManager().getRepository(Image)
     const userRepository: Repository<User> = getManager().getRepository(User)
 
@@ -34,7 +34,7 @@ export default class ImageController {
       ctx.status = 201
     }
   }
-  public static async show(ctx: Context | any) {
+  public static async show(ctx: Context | any): Promise<void> {
     const imageRepository: Repository<Image> = getManager().getRepository(Image)
 
     const image = await imageRepository.findOne(
@@ -60,7 +60,7 @@ export default class ImageController {
       ctx.status = 200
     }
   }
-  public static async index(ctx: Context | any) {
+  public static async index(ctx: Context | any): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
 
     const user: User = await userRepository.findOne(
@@ -80,7 +80,7 @@ export default class ImageController {
       ctx.status = 200
     }
   }
-  public static async delete(ctx: Context | any) {
+  public static async delete(ctx: Context | any): Promise<void> {
     const imageRepository: Repository<Image> = getManager().getRepository(Image)
 
     const image: Image = await imageRepository.findOne(

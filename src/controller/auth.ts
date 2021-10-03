@@ -58,7 +58,7 @@ export default class AuthController {
     }
   }
 
-  public static async verify(ctx: Context | any) {
+  public static async verify(ctx: Context | any): Promise<void> {
     // get email token repository
     const tokenRepository: Repository<EmailVerifyToken> = getManager().getRepository(EmailVerifyToken)
 
@@ -81,7 +81,7 @@ export default class AuthController {
     }
   }
 
-  public static async resend(ctx: Context | any) {
+  public static async resend(ctx: Context | any): Promise<void> {
     const userRepository: Repository<User> = getManager().getRepository(User)
     const tokenRepository: Repository<EmailVerifyToken> = getManager().getRepository(EmailVerifyToken)
 

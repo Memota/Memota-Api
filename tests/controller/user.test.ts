@@ -11,7 +11,7 @@ let user: User
 let userInRepository: User
 
 jest.mock("typeorm", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -33,7 +33,7 @@ jest.mock("typeorm", () => {
 })
 
 jest.mock("class-validator", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -51,7 +51,7 @@ jest.mock("class-validator", () => {
 })
 
 jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
   return {

@@ -94,7 +94,7 @@ export class User {
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
 
-  async hashPassword() {
+  async hashPassword(): Promise<void> {
     this.password = await hash(this.password, 10)
   }
 

@@ -1,13 +1,13 @@
 import { Context } from "koa"
 import { validate } from "class-validator"
 import { getManager } from "typeorm"
-import fs from "fs"
 
 import { User } from "../../src/entity/user"
 import { Note } from "../../src/entity/note"
 import NoteController from "../../src/controller/note"
 import { SharedNote } from "../../src/entity/sharedNote"
 import { Image } from "../../src/entity/image"
+import fs from "fs"
 import { toBuffer } from "../../src/utils/pdf"
 import { NoteOptions } from "../../src/entity/noteOptions"
 
@@ -20,7 +20,7 @@ let sharedNote: SharedNote
 let samplePDF: Buffer
 
 jest.mock("typeorm", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -42,7 +42,7 @@ jest.mock("typeorm", () => {
 })
 
 jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
   return {
@@ -51,7 +51,7 @@ jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
 })
 
 jest.mock("class-validator", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 

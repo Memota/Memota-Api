@@ -135,7 +135,7 @@ export default class NotesController {
 
   public static async update(ctx: Context): Promise<void> {
     const noteRepository: Repository<Note> = getManager().getRepository(Note)
-    const imageRepository: Repository<Image> = getManager().getRepository(Image)
+    getManager().getRepository(Image)
     const noteOptionsRepository: Repository<NoteOptions> = getManager().getRepository(NoteOptions)
 
     const noteToBePatched: Note = new Note()

@@ -14,7 +14,7 @@ let verifyToken: EmailVerifyToken
 let resetToken: PasswordResetToken
 
 jest.mock("typeorm", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -36,7 +36,7 @@ jest.mock("typeorm", () => {
 })
 
 jest.mock("class-validator", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -54,7 +54,7 @@ jest.mock("class-validator", () => {
 })
 
 jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
   return {
@@ -65,13 +65,12 @@ jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
 jest.mock("../../src/email", () => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    sendVerifyMail: () => {},
+    sendVerifyMail: (): void => {},
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    sendResetMail: () => {},
+    sendResetMail: (): void => {},
   }
 })
 
-const configMock = jest.fn()
 jest.mock("../../src/config", () => {
   return {
     config: { jwtSecret: "test" },

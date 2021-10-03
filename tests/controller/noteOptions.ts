@@ -17,10 +17,9 @@ let note: Note
 let image: Image
 let testImageArrayBuffer: ArrayBuffer
 let sharedNote: SharedNote
-let samplePDF: Buffer
 
 jest.mock("typeorm", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -42,7 +41,7 @@ jest.mock("typeorm", () => {
 })
 
 jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
   return {
@@ -51,7 +50,7 @@ jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
 })
 
 jest.mock("class-validator", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -108,8 +107,6 @@ beforeEach(async () => {
   userInRepository.password = user.password
   userInRepository.verified = true
   await userInRepository.hashPassword()
-
-  samplePDF = toBuffer(fs.readFileSync("assets/samplePDF.pdf", null).buffer)
 })
 
 describe("Note options controller", () => {
