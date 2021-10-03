@@ -10,6 +10,7 @@ import { SharedNote } from "../../src/entity/sharedNote"
 import { Image } from "../../src/entity/image"
 import fs from "fs"
 import { toBuffer } from "../../src/utils/pdf"
+import { NoteOptions } from "../../src/entity/noteOptions"
 
 let user: User
 let userInRepository: User
@@ -97,7 +98,10 @@ beforeEach(async () => {
   note.color = "#ffffff"
   note.sharedNote = sharedNote
   note.image = image
+  note.options = new NoteOptions()
+  note.options.encrypted = false
   user.notes = [note]
+  sharedNote.note = note
 
   userInRepository = new User()
   userInRepository.email = user.email
@@ -114,8 +118,10 @@ describe("Note controller", () => {
   it("createNote -> Status 201", async () => {
     const userRepository = { findOne: jest.fn().mockReturnValue(user) }
     const noteRepository = { save: jest.fn().mockReturnValue(note) }
+    const noteOptionsRepository = { save: jest.fn().mockReturnValue(note.options) }
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => userRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteOptionsRepository })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const context = ({
@@ -129,6 +135,7 @@ describe("Note controller", () => {
 
     expect(userRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.save).toHaveBeenCalledTimes(1)
+    expect(noteOptionsRepository.save).toHaveBeenCalledTimes(1)
     expect(context.status).toBe(201)
     expect(context.body).toStrictEqual(note)
   })
@@ -136,8 +143,10 @@ describe("Note controller", () => {
   it("createNote -> Status 401", async () => {
     const userRepository = { findOne: jest.fn().mockReturnValue(undefined) }
     const noteRepository = { save: jest.fn().mockReturnValue(note) }
+    const noteOptionsRepository = { save: jest.fn().mockReturnValue(note.options) }
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => userRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteOptionsRepository })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const context = ({
@@ -157,8 +166,10 @@ describe("Note controller", () => {
   it("createNote -> Status 400", async () => {
     const userRepository = { findOne: jest.fn().mockReturnValue(user) }
     const noteRepository = { save: jest.fn().mockReturnValue(note) }
+    const noteOptionsRepository = { save: jest.fn().mockReturnValue(note.options) }
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => userRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteOptionsRepository })
     ;(validate as jest.Mock).mockReturnValue(["validation error"])
 
     const context = ({
@@ -275,9 +286,10 @@ describe("Note controller", () => {
   it("patchNote title -> Status 200", async () => {
     const noteRepository = { findOne: jest.fn().mockReturnValue(note), save: jest.fn().mockReturnValue(note) }
     const imageRepository = {}
+    const noteOptionsRepository = { save: jest.fn().mockReturnValue(note.options) }
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
-    ;(validate as jest.Mock).mockReturnValue([])
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteOptionsRepository })
 
     const patchNote = new Note()
     patchNote.title = "patched title"
@@ -304,8 +316,10 @@ describe("Note controller", () => {
   it("patchNote text -> Status 200", async () => {
     const noteRepository = { findOne: jest.fn().mockReturnValue(note), save: jest.fn().mockReturnValue(note) }
     const imageRepository = {}
+    const noteOptionsRepository = { save: jest.fn().mockReturnValue(note.options) }
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteOptionsRepository })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const patchNote = new Note()
@@ -333,8 +347,10 @@ describe("Note controller", () => {
   it("patchNote -> Status 200", async () => {
     const noteRepository = { findOne: jest.fn().mockReturnValue(note), save: jest.fn().mockReturnValue(note) }
     const imageRepository = {}
+    const noteOptionsRepository = { save: jest.fn().mockReturnValue(note.options) }
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteOptionsRepository })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const patchNote = new Note()
@@ -354,6 +370,7 @@ describe("Note controller", () => {
     expect(noteRepository.findOne).toHaveBeenCalledTimes(1)
     expect(noteRepository.save).toHaveBeenCalledTimes(1)
     expect(noteRepository.save).toHaveBeenCalledWith(note)
+    expect(noteOptionsRepository.save).toHaveBeenCalledWith(note.options)
     expect(context.status).toBe(200)
     expect(context.body).toEqual(note)
     expect((context.body as Note).title).toStrictEqual(patchNote.title)
@@ -365,6 +382,7 @@ describe("Note controller", () => {
     const noteRepository = { findOne: jest.fn().mockReturnValue(note), save: jest.fn().mockReturnValue(note) }
     const imageRepository = {}
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
     ;(validate as jest.Mock).mockReturnValue(["validation error"])
 
@@ -388,9 +406,10 @@ describe("Note controller", () => {
   // Test: patch note -> Note not found
   it("patchNote -> Status 404", async () => {
     const noteRepository = { findOne: jest.fn().mockReturnValue(undefined), save: jest.fn().mockReturnValue(note) }
-    const imageRepository = {}
+    const empty = {}
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
-    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => empty })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => empty })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const patchNote = new Note()
@@ -414,8 +433,10 @@ describe("Note controller", () => {
   it("patchNote -> Status 401", async () => {
     const noteRepository = { findOne: jest.fn().mockReturnValue(note), save: jest.fn().mockReturnValue(note) }
     const imageRepository = {}
+    const noteOptionsRepository = {}
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteRepository })
     ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => imageRepository })
+    ;(getManager as jest.Mock).mockReturnValueOnce({ getRepository: () => noteOptionsRepository })
     ;(validate as jest.Mock).mockReturnValue([])
 
     const patchNote = new Note()

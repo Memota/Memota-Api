@@ -3,6 +3,7 @@ import { User } from "../../src/entity/user"
 import { Image } from "../../src/entity/image"
 import { Note } from "../../src/entity/note"
 import fs from "fs"
+import { NoteOptions } from "../../src/entity/noteOptions"
 
 let user: User
 let image: Image
@@ -31,6 +32,8 @@ beforeEach(() => {
   note.user = user
   note.id = "9n2cfd5b-e905-4493-83df-cf7b570db4f0"
   note.color = "#ffffff"
+  note.options = new NoteOptions()
+  note.options.encrypted = false
   user.notes = [note]
 
   samplePDF = toBuffer(fs.readFileSync("assets/samplePDF.pdf", null).buffer)
