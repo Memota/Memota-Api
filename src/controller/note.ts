@@ -321,11 +321,11 @@ export default class NotesController {
         id: ctx.params.id,
       },
       {
-        relations: ["note"],
+        relations: ["note", "note.options"],
       },
     )
 
-    if (!sharedNote) {
+    if (!sharedNote || sharedNote.note.options.encrypted) {
       ctx.status = 404
       ctx.body = "Shared Note not found"
     } else if (sharedNote.expiresAt != undefined && sharedNote.expiresAt.getTime() < new Date().getTime()) {
@@ -408,13 +408,16 @@ export default class NotesController {
         id: ctx.params.id,
       },
       {
-        relations: ["user", "image"],
+        relations: ["user", "image", "options"],
       },
     )
 
     if (!note) {
       ctx.status = 404
       ctx.body = "Note not found"
+    } else if (note.options.encrypted) {
+      ctx.status = 403
+      ctx.body = "Cannot download encrypted notes"
     } else if (note.user.id !== ctx.state.user.sub) {
       ctx.status = 401
       ctx.body = "No permission"
@@ -436,7 +439,7 @@ export default class NotesController {
         id: ctx.state.user.sub,
       },
       {
-        relations: ["notes", "notes.image"],
+        relations: ["notes", "notes.image", "notes.options"],
       },
     )
     if (!user) {

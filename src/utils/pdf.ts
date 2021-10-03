@@ -160,10 +160,13 @@ export default class FileGenerator {
     return y
   }
 
-  public static async generateBackupZip(user: User, withImages: boolean, colored: boolean): Promise<Buffer> {
+  public static generateBackupZip(user: User, withImages: boolean, colored: boolean): Promise<Buffer> {
     const zip = new JSZip()
     const noteTitles = new Map()
     user.notes.forEach(note => {
+      // Don't contain encrypted notes in backup
+      if (note.options.encrypted) return
+
       const doc = this.generateNotePdf(note, withImages, colored)
       try {
         const pdfName = note.title && note.title != "" ? note.title.toLocaleLowerCase().replace(/ /g, "-") : "untitled"
