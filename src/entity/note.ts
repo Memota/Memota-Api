@@ -12,6 +12,7 @@ import {
 import { User } from "./user"
 import { SharedNote } from "./sharedNote"
 import { Image } from "./image"
+import { NoteOptions } from "./noteOptions"
 
 @Entity()
 export class Note {
@@ -68,4 +69,14 @@ export class Note {
 
   @UpdateDateColumn({ type: "timestamptz" })
   updatedAt: Date
+
+  @OneToOne(
+    () => NoteOptions,
+    options => options.note,
+    {
+      onDelete: "SET NULL",
+    },
+  )
+  @JoinColumn()
+  options: NoteOptions
 }
