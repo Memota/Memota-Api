@@ -1,6 +1,6 @@
-import { Context, DefaultState, ParameterizedContext } from "koa"
-import { ValidationError, validate } from "class-validator"
-import { getManager, OneToOne } from "typeorm"
+import { Context } from "koa"
+import { validate } from "class-validator"
+import { getManager } from "typeorm"
 
 import UserController from "../../src/controller/user"
 import { User } from "../../src/entity/user"
@@ -11,7 +11,7 @@ let user: User
 let userInRepository: User
 
 jest.mock("typeorm", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -33,7 +33,7 @@ jest.mock("typeorm", () => {
 })
 
 jest.mock("class-validator", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -51,7 +51,7 @@ jest.mock("class-validator", () => {
 })
 
 jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
   return {

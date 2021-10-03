@@ -31,8 +31,6 @@ export default class UserController {
     const userToBePatched: User = new User()
     userToBePatched.username = ctx.request.body.username
     userToBePatched.noteColors = ctx.request.body.noteColors as string[]
-    console.log(typeof userToBePatched.noteColors)
-    console.log(ctx.request.body.noteColors)
 
     // validate the info
     const errors: ValidationError[] = await validate(userToBePatched, {

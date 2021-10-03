@@ -26,7 +26,7 @@ const email = new Email({
   preview: false,
 })
 
-export async function sendVerifyMail(user: User, token: PasswordResetToken) {
+export async function sendVerifyMail(user: User, token: PasswordResetToken): Promise<void> {
   await email.send({
     template: "verify",
     message: {
@@ -40,7 +40,7 @@ export async function sendVerifyMail(user: User, token: PasswordResetToken) {
   })
 }
 
-export async function sendResetMail(user: User, token: PasswordResetToken) {
+export async function sendResetMail(user: User, token: PasswordResetToken): Promise<void> {
   await email.send({
     template: "reset",
     message: {

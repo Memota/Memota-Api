@@ -1,11 +1,7 @@
-import { Context, DefaultState, ParameterizedContext } from "koa"
-import { ValidationError, validate } from "class-validator"
-import { getManager, OneToOne } from "typeorm"
+import { Context } from "koa"
+import { getManager } from "typeorm"
 
-import UserController from "../../src/controller/user"
 import { User } from "../../src/entity/user"
-import { Settings } from "../../src/entity/settings"
-import SettingsController from "../../src/controller/settings"
 import ImageController from "../../src/controller/image"
 import { Image } from "../../src/entity/image"
 
@@ -13,7 +9,7 @@ let user: User
 let image: Image
 
 jest.mock("typeorm", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -35,7 +31,7 @@ jest.mock("typeorm", () => {
 })
 
 jest.mock("class-validator", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
 
@@ -53,7 +49,7 @@ jest.mock("class-validator", () => {
 })
 
 jest.mock("@join-com/typeorm-class-validator-is-uniq", () => {
-  const doNothing = () => {
+  const doNothing = (): void => {
     //Empty function that mocks typeorm annotations
   }
   return {
@@ -125,7 +121,7 @@ describe("User controller", () => {
       body: undefined,
       params: { id: image.id },
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      response: { set: () => {} },
+      response: { set: (): void => {} },
     } as unknown) as Context
     await ImageController.show(context)
 
@@ -146,7 +142,7 @@ describe("User controller", () => {
       body: undefined,
       params: { id: image.id },
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      response: { set: () => {} },
+      response: { set: (): void => {} },
     } as unknown) as Context
     await ImageController.show(context)
 

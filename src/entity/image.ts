@@ -1,4 +1,4 @@
-import { IsHexColor, IsOptional, Length } from "class-validator"
+import { Length } from "class-validator"
 import {
   Entity,
   Column,
@@ -7,11 +7,10 @@ import {
   ManyToOne,
   UpdateDateColumn,
   OneToOne,
-  JoinColumn,
-  PrimaryColumn, OneToMany,
+  OneToMany,
 } from "typeorm"
+
 import { User } from "./user"
-import { SharedNote } from "./sharedNote"
 import { Note } from "./note"
 import { Settings } from "./settings"
 
