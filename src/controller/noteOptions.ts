@@ -12,8 +12,8 @@ export default class NoteOptionsController {
     // Fetch note options from body
     const newOptions: NoteOptions = new NoteOptions()
     newOptions.encrypted = ctx.request.body.encrypted
-    newOptions.pinned = ctx.request.body.encrypted
-    newOptions.hidden = ctx.request.body.encrypted
+    newOptions.pinned = ctx.request.body.pinned
+    newOptions.hidden = ctx.request.body.hidden
 
     // Validate the note options
     const errors: ValidationError[] = await validate(newOptions, {
